@@ -93,7 +93,7 @@
 
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
             <version>3.5.5</version>
         </dependency>
         <dependency>
@@ -198,10 +198,18 @@
             <artifactId>qrgen</artifactId>
             <version>1.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.4.2.Final</version> <!-- 版本号可能需要替换为最新的稳定版本 -->
+        </dependency>
 
-
-
-
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.4.2.Final</version> <!-- 版本号需要与 mapstruct 依赖项一致 -->
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 
