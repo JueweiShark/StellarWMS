@@ -1,0 +1,95 @@
+#server
+server:
+  port: 8088
+  address: 127.0.0.1
+
+  # datasource
+spring:
+  application:
+    name: WMS
+  data:
+    #    redis配置
+    redis:
+      host: localhost
+      port: 6379
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wms_project?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=UTC
+    username: root
+    password: 111111
+
+  servlet:
+    multipart:
+      max-file-size: 2MB #单个文件的最大值
+      max-request-size: 20MB #上传文件总的最大值
+
+  # 配置邮箱
+  mail:
+    host: smtp.163.com
+    username: kiti_shark@163.com
+    password: GATNSPTHFBUYPRZT #这里放你上面配置好的邮件密码或者授权码
+    default-encoding: UTF-8
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enable: true
+
+
+  #mybatis-plus
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      table-prefix: ms_
+
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs # springdoc 配置自定义路径 :localhost:8888/v3/api-docs
+  swagger-ui:
+    operations-sorter: alpha
+    path: /swagger-ui-custom.html # 自定义 API 文档的路径 :localhost:8888/swagger-ui-custom.html
+    tags-sorter: alpha
+
+  group-configs:
+    - group: adminGroup #分组名
+      packages-to-scan: com.example.blog.controller # 生成文档所需的扫包路径，一般为启动类目录
+      paths-to-match: '/**' #按路径匹配
+    - group: userGroup #分组名
+      packages-to-scan: com.example.blog.controller # 生成文档所需的扫包路径，一般为启动类目录
+      paths-to-match: '/**' #按路径匹配
+
+
+#knife4j 增强配置
+knife4j:
+  enable: true #是否启用增强设置
+  production: false #开启生产环境屏蔽
+  basic:
+    enable: true #是否启用登录认证
+    username: admin
+    password: 121212
+    # 前端UI的个性化配置属性
+  setting:
+    language: zh_cn # 显示语言中文
+    enable-document-manage: true # 是否显示界面中"文档管理"功能
+    enable-swagger-models: true  #是否显示界面中SwaggerModel功能
+    enable-version: true
+    swagger-model-name: SwaggerModel2 # 重命名SwaggerModel名称,默认
+
+qiniu:
+  accessKey: sYzu-thtWUi48lG4fUNTnHk1PDyC2Y8SFoJjVJRe
+  accessSecretKey: Yu7jRPPcH_U8uoennXuDM5zMHRWmipzD0tF1v4xJ
+
+#wx:
+#  appid: wx07e2e8b77ec0fc22
+#  appsecret: fb4634c352fdffd1ae99ec5288a4463b
+
+
+

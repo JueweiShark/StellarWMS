@@ -8,6 +8,7 @@ public class WmsSpringbootProjectApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(WmsSpringbootProjectApplication.class, args);
+        System.out.println("============================================================================");
     }
 
 }
