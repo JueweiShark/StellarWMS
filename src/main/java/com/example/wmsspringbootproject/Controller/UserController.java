@@ -4,12 +4,14 @@ import com.example.wmsspringbootproject.Service.UserService;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
+import com.example.wmsspringbootproject.model.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +20,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin
+
+@Transactional
 public class UserController {
     private final UserService userService;
     @Operation(summary = "获取用户列表")
@@ -50,9 +54,10 @@ public class UserController {
     }
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public Boolean Login(
+    public Result Login(
             @Valid @RequestBody UserForm formData
     ) {
-        return userService.Login(formData);
+        formData.setNickName("dshkadhsadashdjsadgaskdasldhasdhasjkdnaskdgashjdasjajvsdjashjd");
+        return Result.success(formData.getNickName());
     }
 }
