@@ -33,7 +33,7 @@ public class UserController {
     }
     @Operation(summary = "新增用户")
     @PostMapping("/addUser")
-    public Boolean addUser(
+    public Result addUser(
             @Valid @RequestBody UserForm formData
     ) {
        return userService.addUser(formData);
@@ -57,7 +57,6 @@ public class UserController {
     public Result Login(
             @Valid @RequestBody UserForm formData
     ) {
-        formData.setNickName("dshkadhsadashdjsadgaskdasldhasdhasjkdnaskdgashjdasjajvsdjashjd");
-        return Result.success(formData.getNickName());
+        return userService.Login(formData);
     }
 }

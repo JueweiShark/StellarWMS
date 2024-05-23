@@ -11,6 +11,7 @@ import com.example.wmsspringbootproject.mapper.UserMapper;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
+import com.example.wmsspringbootproject.model.vo.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -58,11 +59,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
     }
 
     @Override
-    public Boolean Login(UserForm userForm) {
+    public Result Login(UserForm userForm) {
         Users users1 =this.baseMapper.selectOne(new LambdaQueryWrapper<Users>()
                 .eq(userForm.getName()!=null, Users::getName,userForm.getName())
                 .eq(userForm.getEmail()!=null, Users::getEmail,userForm.getEmail())
         );
+        System.out.println(userForm.getName());
+        System.out.println(userForm.getEmail());
         if(users1 !=null){
             if(userForm.getName()!=null){
                 return this.LoginByName(userForm, users1);
@@ -70,30 +73,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
                 return this.LoginByEMail(userForm, users1);
             }
         }
-        return false;
+        return Result.fail(406,"找不到该用户");
     }
 
     @Override
-    public Boolean addUser(UserForm userForm) {
+    public Result addUser(UserForm userForm) {
         String name = userForm.getName();
-        String phone=userForm.getPhone();
         String email=userForm.getEmail();
         long count = this.count(new LambdaQueryWrapper<Users>()
                 .eq(Users::getName, name)
         );
         long count1 = this.count(new LambdaQueryWrapper<Users>()
-                .eq(Users::getPhone, phone)
-        );
-        long count2 = this.count(new LambdaQueryWrapper<Users>()
                 .eq(Users::getEmail, email)
         );
-        Assert.isTrue(count == 0, "该用户名已存在");
-        Assert.isTrue(count1 == 0, "该手机号已存在");
-        Assert.isTrue(count2 == 0, "该邮箱号已存在");
+        if(count!=0){
+            return Result.fail(407,"该用户名已存在");
+        }if(count1!=0){
+            return Result.fail(408,"该邮箱号已存在");
+        }
         Users entity = userConverter.form2Entity(userForm);
         boolean result = this.save(entity);
-        Assert.isTrue(result, "用户新增失败");
-        return result;
+        if(!result){
+            return Result.fail(401,"操作失败");
+        }
+        return Result.success(entity);
     }
 
     @Override
@@ -137,17 +140,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
         Assert.isTrue(result, "用户删除失败");
         return result;
     }
-    public Boolean LoginByName(UserForm userForm, Users users){
+    public Result LoginByName(UserForm userForm, Users users){
         if(userForm.getName().equals(users.getName())
             && userForm.getPassword().equals(users.getPassword()) ){
-            return true;
+            return Result.success(userForm);
         }
-        return false;
+        return Result.fail(404,"找不到该用户");
     }
-    public Boolean LoginByEMail(UserForm userForm, Users users){
+    public Result LoginByEMail(UserForm userForm, Users users){
         if(userForm.getEmail().equals(users.getEmail())){
-            return true;
+            return Result.success(userForm);
         }
-        return false;
+        return Result.fail(405,"找不到该用户");
     }
 }
