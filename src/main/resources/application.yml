@@ -5,6 +5,10 @@ server:
 
   # datasource
 spring:
+  security:
+    user:
+      name: admin
+      password: 123456
   application:
     name: WMS
   data:
@@ -60,10 +64,10 @@ springdoc:
 
   group-configs:
     - group: adminGroup #分组名
-      packages-to-scan: com.example.blog.controller # 生成文档所需的扫包路径，一般为启动类目录
+      packages-to-scan: com.example.wmsspringbootproject.Controller # 生成文档所需的扫包路径，一般为启动类目录
       paths-to-match: '/**' #按路径匹配
     - group: userGroup #分组名
-      packages-to-scan: com.example.blog.controller # 生成文档所需的扫包路径，一般为启动类目录
+      packages-to-scan: com.example.wmsspringbootproject.controller # 生成文档所需的扫包路径，一般为启动类目录
       paths-to-match: '/**' #按路径匹配
 
 
@@ -73,8 +77,8 @@ knife4j:
   production: false #开启生产环境屏蔽
   basic:
     enable: true #是否启用登录认证
-    username: admin
-    password: 121212
+    username: admin #登录用户名
+    password: 123456 #登录密码
     # 前端UI的个性化配置属性
   setting:
     language: zh_cn # 显示语言中文
@@ -82,11 +86,15 @@ knife4j:
     enable-swagger-models: true  #是否显示界面中SwaggerModel功能
     enable-version: true
     swagger-model-name: SwaggerModel2 # 重命名SwaggerModel名称,默认
+    enable-dynamic-parameter: true # 是否显示界面中"动态参数"功能
 
 qiniu:
   accessKey: sYzu-thtWUi48lG4fUNTnHk1PDyC2Y8SFoJjVJRe
   accessSecretKey: Yu7jRPPcH_U8uoennXuDM5zMHRWmipzD0tF1v4xJ
 
+jwt:
+  secret: "a34e856a68f461f708757c32281bc750"
+  expiration: 36
 #wx:
 #  appid: wx07e2e8b77ec0fc22
 #  appsecret: fb4634c352fdffd1ae99ec5288a4463b
