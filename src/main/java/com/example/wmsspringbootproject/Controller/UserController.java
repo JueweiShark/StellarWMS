@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -78,8 +79,6 @@ public class UserController {
     public Result warehouseList(
             @ParameterObject WarehouseQuery warehouseQueryParam
     ) {
-        System.out.println(warehouseQueryParam.getPageNum());
-        System.out.println(warehouseQueryParam.getName());
         Page<Warehouse> warehousePage = new Page<>(warehouseQueryParam.getPageNum(), 10);
         List<Warehouse> list = new ArrayList<>();
             for (int j = 0; j < warehouseQueryParam.getPageSize(); j++) {
@@ -110,5 +109,28 @@ public class UserController {
         warehousePage.setRecords(list);
         return Result.success(warehousePage);
     }
-
+    @Operation(summary = "增加仓库")
+    @PostMapping("/warehouseAdd")
+    public Result warehouseAdd(
+       @RequestBody WarehouseQuery warehouseQueryParam
+    ) {
+        System.out.println("增加仓库："+warehouseQueryParam);
+        return Result.success(warehouseQueryParam);
+    }
+    @Operation(summary = "修改仓库")
+    @PostMapping("/warehouseEdit")
+    public Result warehouseEdit(
+            @RequestBody WarehouseQuery warehouseQueryParam
+    ) {
+        System.out.println("修改仓库："+warehouseQueryParam);
+        return Result.success(warehouseQueryParam);
+    }
+    @Operation(summary = "删除仓库")
+    @PostMapping("/warehouseDel/{ids}")
+    public Result warehouseDel(
+            @PathVariable Long ids
+    ) {
+        System.out.println("删除仓库："+ids);
+        return Result.success(ids);
+    }
 }

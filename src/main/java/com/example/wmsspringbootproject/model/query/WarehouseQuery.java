@@ -5,11 +5,11 @@ import lombok.Data;
 
 @Data
 public class WarehouseQuery extends BasePageQuery {
+    private Long id;
     private String name;
     private String address;
     private String contactPerson;
     private String contactPhone;
     private String createTime;
     private int status;
-    private int deleted;
 }
