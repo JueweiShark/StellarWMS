@@ -11,5 +11,7 @@ public interface UserConverter {
     UserForm entity2Form(Users entity);
     UserVO entity2Vo(Users entity);
 
+    Users Vo2entity(UserVO vo);
+
     Users form2Entity(UserForm userForm);
 }

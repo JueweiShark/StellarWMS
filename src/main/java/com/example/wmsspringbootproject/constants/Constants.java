@@ -1,5 +1,8 @@
 package com.example.wmsspringbootproject.constants;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public interface Constants {
 
     interface PageQuery{
@@ -24,4 +27,11 @@ public interface Constants {
         long YEAR=12*MONTH;
     }
 
+    interface RolesValue{
+        String ADMIN="admin";
+        String GUEST="guest";
+        String ROOT="root";
+
+        String[] ROLES={ADMIN, GUEST, ROOT};
+    }
 }

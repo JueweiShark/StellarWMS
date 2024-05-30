@@ -6,14 +6,17 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.wmsspringbootproject.Service.UserService;
+import com.example.wmsspringbootproject.common.Annotation.Subject;
 import com.example.wmsspringbootproject.converter.UserConverter;
 import com.example.wmsspringbootproject.mapper.UserMapper;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
 import com.example.wmsspringbootproject.model.vo.Result;
+import com.example.wmsspringbootproject.model.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,8 +24,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements UserService {
-    private final UserConverter userConverter;
+    private final PasswordEncoder passwordEncoder;
 
+    private final UserConverter userConverter;
     @Override
     public List<Users> UserList(UserQuery userQuery) {
         String keyword = userQuery.getKeyword();
@@ -59,26 +63,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
     }
 
     @Override
-    public Result Login(UserForm userForm) {
-        Users users1 =this.baseMapper.selectOne(new LambdaQueryWrapper<Users>()
-                .eq(userForm.getName()!=null, Users::getName,userForm.getName())
-                .eq(userForm.getEmail()!=null, Users::getEmail,userForm.getEmail())
-        );
-        System.out.println(userForm.getName());
-        System.out.println(userForm.getEmail());
-        if(users1 !=null){
-            if(userForm.getName()!=null){
-                return this.LoginByName(userForm, users1);
-            }else if(userForm.getEmail()!=null){
-                return this.LoginByEMail(userForm, users1);
-            }
-        }
-        return Result.fail(406,"找不到该用户");
-    }
-
-    @Override
     public Result addUser(UserForm userForm) {
         String name = userForm.getName();
+        userForm.setName(name);
         String email=userForm.getEmail();
         long count = this.count(new LambdaQueryWrapper<Users>()
                 .eq(Users::getName, name)
@@ -88,10 +75,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
         );
         if(count!=0){
             return Result.fail(407,"该用户名已存在");
-        }if(count1!=0){
+        }
+        if(count1!=0){
             return Result.fail(408,"该邮箱号已存在");
         }
         Users entity = userConverter.form2Entity(userForm);
+        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         boolean result = this.save(entity);
         if(!result){
             return Result.fail(401,"操作失败");
@@ -140,6 +129,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
         Assert.isTrue(result, "用户删除失败");
         return result;
     }
+
+    @Override
+    public UserVO getUserAuthInfo(String username) {
+        Users user= this.baseMapper.selectOne(new LambdaQueryWrapper<Users>()
+                .eq(Users::getName, username));
+        return userConverter.entity2Vo(user);
+    }
+
     public Result LoginByName(UserForm userForm, Users users){
         if(userForm.getName().equals(users.getName())
             && userForm.getPassword().equals(users.getPassword()) ){
