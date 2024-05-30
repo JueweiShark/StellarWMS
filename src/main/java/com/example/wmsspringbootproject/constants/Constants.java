@@ -34,4 +34,11 @@ public interface Constants {
 
         String[] ROLES={ADMIN, GUEST, ROOT};
     }
+
+    interface Default{
+        int DELETED=0;
+
+        int PREPARED=1;//已就绪
+
+    }
 }

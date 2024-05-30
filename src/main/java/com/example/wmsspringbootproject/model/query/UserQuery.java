@@ -1,11 +1,12 @@
 package com.example.wmsspringbootproject.model.query;
 
+import com.example.wmsspringbootproject.common.base.BasePageQuery;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Schema(description ="用户查询对象")
 @Data
-public class UserQuery {
+public class UserQuery extends BasePageQuery {
     @Schema(description="关键字(用户名)")
     private String keyword;
     @Schema(description="类型")
