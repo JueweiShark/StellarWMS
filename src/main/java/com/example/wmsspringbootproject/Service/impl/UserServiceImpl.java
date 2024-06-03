@@ -74,16 +74,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
                 .eq(Users::getEmail, email)
         );
         if(count!=0){
-            return Result.fail(407,"该用户名已存在");
+            return Result.fail("407","该用户名已存在");
         }
         if(count1!=0){
-            return Result.fail(408,"该邮箱号已存在");
+            return Result.fail("408","该邮箱号已存在");
         }
         Users entity = userConverter.form2Entity(userForm);
         entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         boolean result = this.save(entity);
         if(!result){
-            return Result.fail(401,"操作失败");
+            return Result.fail("401","操作失败");
         }
         return Result.success(entity);
     }
@@ -142,12 +142,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
             && userForm.getPassword().equals(users.getPassword()) ){
             return Result.success(userForm);
         }
-        return Result.fail(404,"找不到该用户");
+        return Result.fail("404","找不到该用户");
     }
     public Result LoginByEMail(UserForm userForm, Users users){
         if(userForm.getEmail().equals(users.getEmail())){
             return Result.success(userForm);
         }
-        return Result.fail(405,"找不到该用户");
+        return Result.fail("405","找不到该用户");
     }
 }

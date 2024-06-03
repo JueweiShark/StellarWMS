@@ -28,7 +28,7 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
     private final WareHouseConverter converter;
 
     @Override
-    public Result<List<WareHouseVO>> warehouseList(WarehouseQuery query) {
+    public Result<IPage<WareHouseVO>> warehouseList(WarehouseQuery query) {
 
         LambdaQueryWrapper<Warehouses> queryWrapper=new LambdaQueryWrapper<>();
         Page<Warehouses> warehousesPage=new Page<>(query.getPageNum(),query.getPageSize());
@@ -52,9 +52,13 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
             }
         }
         IPage<Warehouses> warehousesList =this.page(warehousesPage,queryWrapper);
-        List<WareHouseVO> wareHouseVOList= warehousesList.getRecords().stream().map(converter::entity2Vo).toList();
-
-        return Result.success(wareHouseVOList);
+        IPage<WareHouseVO> wareHouseVOIPage = new Page<>();
+        wareHouseVOIPage.setRecords(warehousesList.getRecords().stream().map(converter::entity2Vo).toList());
+        wareHouseVOIPage.setPages(warehousesList.getPages());
+        wareHouseVOIPage.setCurrent(warehousesList.getCurrent());
+        wareHouseVOIPage.setSize(warehousesList.getSize());
+        wareHouseVOIPage.setTotal(warehousesList.getTotal());
+        return Result.success(wareHouseVOIPage);
     }
 
     @Override

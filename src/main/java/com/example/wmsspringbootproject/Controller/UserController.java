@@ -57,7 +57,7 @@ public class UserController {
     }
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public LoginResult Login(
+    public Result Login(
             @Valid @RequestBody UserForm formData
     ) {
         return authUserService.Login(formData);

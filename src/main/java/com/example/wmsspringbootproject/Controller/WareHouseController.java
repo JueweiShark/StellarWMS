@@ -1,5 +1,6 @@
 package com.example.wmsspringbootproject.Controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.wmsspringbootproject.Service.WareHouseService;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.form.WareHouseForm;
@@ -50,7 +51,7 @@ public class WareHouseController {
 
     @GetMapping("/list")
     @Operation(summary = "获取仓库列表")
-    public Result<List<WareHouseVO>> listWareHouse(
+    public Result<IPage<WareHouseVO>> listWareHouse(
         @ParameterObject WarehouseQuery query
     ){
         return service.warehouseList(query);
