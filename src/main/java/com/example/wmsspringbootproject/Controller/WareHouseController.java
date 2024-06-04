@@ -38,6 +38,7 @@ public class WareHouseController {
     public Result<Boolean> addWareHouse(
             @RequestBody WareHouseForm wareHouseForm
     ){
+        System.out.println(wareHouseForm.getStatus());
         return service.saveWareHouseInfo(wareHouseForm);
     }
 
@@ -60,7 +61,7 @@ public class WareHouseController {
     @PutMapping("/update")
     @Operation(summary = "修改仓库信息")
     public Result<Boolean> updateWareHouse(
-            @ParameterObject WareHouseForm wareHouseForm
+            @RequestBody WareHouseForm wareHouseForm
     ){
         return service.updateWareHouseInfo(wareHouseForm);
     }
