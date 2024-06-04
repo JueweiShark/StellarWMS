@@ -36,19 +36,19 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
             queryWrapper.gt(Warehouses::getId,0);
 
             if (!TextUtil.textIsEmpty(query.getName())) {
-                queryWrapper.or(wrapper -> wrapper.like(Warehouses::getName, query.getName()));
+                queryWrapper.and(wrapper -> wrapper.like(Warehouses::getName, query.getName()));
             }
             if (!TextUtil.textIsEmpty(query.getAddress())) {
-                queryWrapper.or(wrapper -> wrapper.like(Warehouses::getAddress, query.getAddress()));
+                queryWrapper.and(wrapper -> wrapper.like(Warehouses::getAddress, query.getAddress()));
             }
             if (!TextUtil.textIsEmpty(query.getContactPhone())) {
-                queryWrapper.or(wrapper -> wrapper.like(Warehouses::getContactPhone, query.getContactPhone()));
+                queryWrapper.and(wrapper -> wrapper.like(Warehouses::getContactPhone, query.getContactPhone()));
             }
             if (!TextUtil.textIsEmpty(query.getContactPerson())) {
-                queryWrapper.or(wrapper -> wrapper.like(Warehouses::getContactPerson, query.getContactPerson()));
+                queryWrapper.and(wrapper -> wrapper.like(Warehouses::getContactPerson, query.getContactPerson()));
             }
             if (!TextUtil.textIsEmpty(query.getStatus())) {
-                queryWrapper.or(wrapper -> wrapper.eq(Warehouses::getStatus, query.getStatus()));
+                queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getStatus, query.getStatus()));
             }
         }
         IPage<Warehouses> warehousesList =this.page(warehousesPage,queryWrapper);
@@ -66,7 +66,6 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         Warehouses warehouses =converter.form2Entity(form);
         warehouses.setCreateTime(TextUtil.formatDate(new Date()));
         warehouses.setDeleted(Constants.Default.DELETED);
-        warehouses.setStatus(Constants.Default.PREPARED);
         Boolean result=this.save(warehouses);
         return Result.success(result);
     }
