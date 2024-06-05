@@ -29,7 +29,7 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
 
     @Override
     public Result<IPage<WareHouseVO>> warehouseList(WarehouseQuery query) {
-
+        System.out.println("Status是:"+query.getStatus());
         LambdaQueryWrapper<Warehouses> queryWrapper=new LambdaQueryWrapper<>();
         Page<Warehouses> warehousesPage=new Page<>(query.getPageNum(),query.getPageSize());
         if (query != null) {
@@ -47,9 +47,10 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
             if (!TextUtil.textIsEmpty(query.getContactPerson())) {
                 queryWrapper.and(wrapper -> wrapper.like(Warehouses::getContactPerson, query.getContactPerson()));
             }
-            if (!TextUtil.textIsEmpty(query.getStatus())) {
+            if (query.getStatus()!=-1) {
                 queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getStatus, query.getStatus()));
             }
+            queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getDeleted, 0));
         }
         IPage<Warehouses> warehousesList =this.page(warehousesPage,queryWrapper);
         IPage<WareHouseVO> wareHouseVOIPage = new Page<>();
@@ -89,11 +90,15 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         String[] idArray=ids.split(",");
         if(idArray.length>1){
             for (String id : idArray) {
-                this.removeById(id);
+                Warehouses warehouses=this.getById(id);
+                warehouses.setDeleted(1);
+                this.baseMapper.updateById(warehouses);
             }
             return Result.success();
         }else{
-            Boolean result=this.removeById(ids);
+            Warehouses warehouses=this.getById(ids);
+            warehouses.setDeleted(1);
+            Boolean result=this.baseMapper.updateById(warehouses)>0;
             return result ? Result.success(result) : Result.failed("删除仓库信息失败");
         }
     }

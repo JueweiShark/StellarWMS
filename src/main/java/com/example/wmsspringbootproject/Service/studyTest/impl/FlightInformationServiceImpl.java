@@ -34,7 +34,7 @@ public class FlightInformationServiceImpl extends ServiceImpl<FlightInformationM
             flightInformation.setEndCity("");
         }
         if (flightInformation.getStartDate()!= null) {
-            queryWrapper.ge(FlightInformation::getStartDate, flightInformation.getStartDate());
+            queryWrapper.like(FlightInformation::getStartDate, flightInformation.getStartDate());
         }
         if (flightInformation.getStartCity()!= null) {
             queryWrapper.like(FlightInformation::getStartCity, flightInformation.getStartCity());

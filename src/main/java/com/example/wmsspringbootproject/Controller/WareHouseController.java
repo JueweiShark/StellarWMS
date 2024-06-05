@@ -42,7 +42,7 @@ public class WareHouseController {
         return service.saveWareHouseInfo(wareHouseForm);
     }
 
-    @DeleteMapping("/delete/{ids}'")
+    @DeleteMapping("/delete/{ids}")
     @Operation(summary = "删除仓库信息")
     public Result<Boolean> deleteWareHouse(
            @Parameter(description="需要删除的ids多个id用','隔开") @PathVariable("ids") String ids
@@ -55,6 +55,7 @@ public class WareHouseController {
     public Result<IPage<WareHouseVO>> listWareHouse(
         @ParameterObject WarehouseQuery query
     ){
+        System.out.println(query.getStatus());
         return service.warehouseList(query);
     }
 
