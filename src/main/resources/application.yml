@@ -14,13 +14,26 @@ spring:
   data:
     #    redis配置
     redis:
-      host: localhost
+      host: 192.168.74.138
       port: 6379
+      database: 6
+      password: 123456
+      timeout: 10s
+      lettuce:
+        pool:
+          # 连接池最大连接数 默认8 ，负数表示没有限制
+          max-active: 8
+          # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认-1
+          max-wait: -1
+          # 连接池中的最大空闲连接 默认8
+          max-idle: 8
+          # 连接池中的最小空闲连接 默认0
+          min-idle: 0
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/wms_project?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=UTC
     username: root
-    password: 111111
+    password: 777777
 
   servlet:
     multipart:
@@ -94,7 +107,7 @@ qiniu:
 
 jwt:
   secret: "a34e856a68f461f708757c32281bc750"
-  expiration: 36
+  expiration: 7200
 #wx:
 #  appid: wx07e2e8b77ec0fc22
 #  appsecret: fb4634c352fdffd1ae99ec5288a4463b
