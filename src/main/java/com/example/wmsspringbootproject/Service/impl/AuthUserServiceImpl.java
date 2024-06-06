@@ -23,11 +23,10 @@ public class AuthUserServiceImpl implements AuthUserService {
                 new UsernamePasswordAuthenticationToken(userForm.getName(),userForm.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         String accessToken = jwtTokenUtil.createToken(authentication);
-        LoginResult.builder()
+        return Result.success(LoginResult.builder()
                 .tokenType("wms")
                 .accessToken(accessToken)
-                .build();
-        System.out.println(Result.success(accessToken).getMsg());
-        return Result.success(accessToken);
+                .expires(Long.parseLong(String.valueOf(jwtTokenUtil.getExpiredDateFromToken(accessToken).getTime())))
+                .build());
     }
 }

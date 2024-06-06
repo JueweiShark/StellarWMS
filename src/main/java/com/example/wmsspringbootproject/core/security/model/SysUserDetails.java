@@ -1,4 +1,4 @@
-package com.example.wmsspringbootproject.core.security;
+package com.example.wmsspringbootproject.core.security.model;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -10,40 +10,46 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
 public class SysUserDetails implements UserDetails {
+
     private int id;
+
     private String name;
+
     private String password;
 
     private Boolean enabled;
 
+    private Integer dataScope;
+
     private Collection<SimpleGrantedAuthority> authorities;
+
+    private String warehouseId;
 
     public SysUserDetails(Users authorInfo){
         this.id=authorInfo.getId();
-        Set<String> roles=new HashSet<String>();
-        roles.add(Constants.RolesValue.ROLES[authorInfo.getType()]);
+        Set<String> roles=authorInfo.getRoles();
 
         Set<SimpleGrantedAuthority> authoritySet;
+
         if(CollectionUtil.isNotEmpty(roles)){
             authoritySet=roles
                     .stream()
-                    .map(role->new SimpleGrantedAuthority("ROLE_"+role))
+                    .map(role->new SimpleGrantedAuthority("role_"+role))
                     .collect(Collectors.toSet());
         }else{
-            authoritySet= Collections.EMPTY_SET;
+            authoritySet=Collections.emptySet();
         }
         this.authorities=authoritySet;
         this.name=authorInfo.getName();
         this.password=authorInfo.getPassword();
+        this.dataScope=authorInfo.getDataScope();
+        this.warehouseId=authorInfo.getWarehouseId();
         this.enabled= ObjectUtil.equal(authorInfo.getDeleted(),1);
     }
 

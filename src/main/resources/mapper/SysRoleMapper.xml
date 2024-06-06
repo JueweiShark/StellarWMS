@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.wmsspringbootproject.mapper.SysRoleMapper">
+    <select id="getMaxDataScope" resultType="integer">
+               select min(data_scope) from user_type
+<where>
+    <choose>
+        <when test="roles!=null and roles.size>0">
+                and code in
+            <foreach collection="roles" item="role" separator="," open="(" close=")">
+                #{role}
+            </foreach>
+        </when>
+<otherwise>
+    id=-1
+</otherwise>
+    </choose>
+</where>
+    </select>
+</mapper>

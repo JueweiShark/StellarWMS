@@ -66,8 +66,7 @@ public class WebSpringSecurityConfig{
                         "/swagger-ui-custom/**",
                         "/swagger-ui-custom.html",
                         "/ws/**",
-                        "/ws-app/**",
-                        "/**"
+                        "/ws-app/**"
                 );
     }
 

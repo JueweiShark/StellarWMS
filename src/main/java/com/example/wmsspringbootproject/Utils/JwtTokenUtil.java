@@ -2,7 +2,7 @@ package com.example.wmsspringbootproject.Utils;
 
 import cn.hutool.core.convert.Convert;
 import com.example.wmsspringbootproject.constants.JwtClaimConstants;
-import com.example.wmsspringbootproject.core.security.SysUserDetails;
+import com.example.wmsspringbootproject.core.security.model.SysUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -71,9 +71,12 @@ public class JwtTokenUtil {
         SysUserDetails userDetails=new SysUserDetails();
         userDetails.setName(Convert.toStr(claims.get(JwtClaimConstants.USERNAME)));
         userDetails.setId(Convert.toInt(claims.get(JwtClaimConstants.USER_ID)));
+        userDetails.setDataScope(Convert.toInt(claims.get(JwtClaimConstants.DATASCOPE)));
+        userDetails.setWarehouseId(Convert.toStr(claims.get(JwtClaimConstants.WAREHOUSE_ID)));
 
-        Set<SimpleGrantedAuthority> authorities=((ArrayList<String>)claims.get(JwtClaimConstants.AUTHORITIES))
-                .stream().map(SimpleGrantedAuthority::new)
+        Set<SimpleGrantedAuthority> authorities=Convert.toList(claims.get(JwtClaimConstants.AUTHORITIES))
+                .stream().map(item->
+                        new SimpleGrantedAuthority(item.toString()))
                 .collect(Collectors.toSet());
         return new UsernamePasswordAuthenticationToken(userDetails,"",authorities);
     }
@@ -107,7 +110,7 @@ public class JwtTokenUtil {
     /**
      * 从token中获取过期时间
      */
-    private Date getExpiredDateFromToken(String token) {
+    public Date getExpiredDateFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.getExpiration();
     }
@@ -119,6 +122,8 @@ public class JwtTokenUtil {
         SysUserDetails userDetails = (SysUserDetails) authentication.getPrincipal();
         claims.put(JwtClaimConstants.USER_ID, userDetails.getId()); // 用户ID
         claims.put(JwtClaimConstants.USERNAME, claims.getSubject()); // 用户名
+        claims.put(JwtClaimConstants.DATASCOPE,userDetails.getDataScope());//数据权限
+        claims.put(JwtClaimConstants.WAREHOUSE_ID,userDetails.getWarehouseId());
 
         // claims 中添加角色信息
         Set<String> roles = userDetails.getAuthorities().stream()

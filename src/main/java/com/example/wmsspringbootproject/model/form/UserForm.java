@@ -1,11 +1,15 @@
 package com.example.wmsspringbootproject.model.form;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.io.Serializable;
 
 @Schema(description ="用户表单")
 @Data
-public class UserForm {
+@AllArgsConstructor
+public class UserForm implements Serializable {
     @Schema(description ="用户id")
     private int id;
     @Schema(description ="用户名称")
@@ -14,8 +18,6 @@ public class UserForm {
     private String nickName;
     @Schema(description ="用户密码")
     private String password;
-    @Schema(description ="用户类型")
-    private int type;
     @Schema(description ="用户头像")
     private String avatar;
     @Schema(description ="用户电子邮件")

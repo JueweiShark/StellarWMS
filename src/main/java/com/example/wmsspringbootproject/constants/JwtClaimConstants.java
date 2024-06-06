@@ -15,4 +15,10 @@ public interface JwtClaimConstants {
      * 权限(角色Code)集合
      */
     String AUTHORITIES = "authorities";
+
+    String DATASCOPE="dataScope";
+
+    String DEPT_AND_SUB="deptAndSub";
+
+    String WAREHOUSE_ID="warehouse_id";
 }

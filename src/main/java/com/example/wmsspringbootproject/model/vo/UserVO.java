@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Schema(description ="用户表单")
 @Data
-
 public class UserVO {
     @Schema(description ="用户id")
     private int id;
@@ -31,4 +30,6 @@ public class UserVO {
     private String lastLogin;
     @Schema(description ="是否已被删除")
     private int deleted;
+    @Schema(description = "数据权限范围")
+    private Integer dataScope;
 }

@@ -3,5 +3,59 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.wmsspringbootproject.mapper.UserMapper">
+    <resultMap id="userResultMap" type="com.example.wmsspringbootproject.model.entity.Users">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="email" column="email"/>
+        <result property="password" column="password"/>
+        <result property="avatar" column="avatar"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastLogin" column="last_login"/>
+        <result property="deleted" column="deleted"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="weChatName" column="we_chat_name"/>
+        <result property="phone" column="phone"/>
+        <result property="warehouseId" column="warehouse_id"/>
+    </resultMap>
 
+    <resultMap id="AuthorityInfo" type="com.example.wmsspringbootproject.model.entity.Users">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="email" column="email"/>
+        <result property="password" column="password"/>
+        <result property="avatar" column="avatar"/>
+        <result property="createTime" column="create_time"/>
+        <result property="lastLogin" column="last_login"/>
+        <result property="deleted" column="deleted"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="weChatName" column="we_chat_name"/>
+        <result property="phone" column="phone"/>
+        <result property="warehouseId" column="warehouse_id"/>
+        <collection property="roles" javaType="java.util.Set" ofType="string">
+            <result column="code"/>
+        </collection>
+    </resultMap>
+
+    <select id="getAuthorityInfo" resultMap="AuthorityInfo">
+        SELECT
+            t1.id,
+            t1.name,
+            t1.nick_name,
+            t1.password,
+            t1.email,
+            t1.avatar,
+            t1.create_time,
+            t1.last_login,
+            t1.deleted,
+            t1.we_chat_name,
+            t1.phone,
+            t1.warehouse_id,
+            t3.code
+        FROM
+            users t1
+                LEFT JOIN sys_user_type t2 ON t2.user_id = t1.id
+                LEFT JOIN user_type t3 ON t3.id = t2.role_id
+        WHERE
+            t1.name = #{username} AND t1.deleted = 1
+    </select>
 </mapper>

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.wmsspringbootproject.Service.WareHouseService;
 import com.example.wmsspringbootproject.Utils.TextUtil;
+import com.example.wmsspringbootproject.common.Annotation.DataPermission;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.constants.Constants;
 import com.example.wmsspringbootproject.converter.WareHouseConverter;
@@ -27,6 +28,7 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
 
     private final WareHouseConverter converter;
 
+    @DataPermission(warehouseIdColumnName = "id")
     @Override
     public Result<IPage<WareHouseVO>> warehouseList(WarehouseQuery query) {
 
@@ -34,6 +36,8 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         Page<Warehouses> warehousesPage=new Page<>(query.getPageNum(),query.getPageSize());
         if (query != null) {
             queryWrapper.gt(Warehouses::getId,0);
+
+            boolean b1=TextUtil.textIsEmpty(query.getName());
 
             if (!TextUtil.textIsEmpty(query.getName())) {
                 queryWrapper.and(wrapper -> wrapper.like(Warehouses::getName, query.getName()));
@@ -47,9 +51,8 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
             if (!TextUtil.textIsEmpty(query.getContactPerson())) {
                 queryWrapper.and(wrapper -> wrapper.like(Warehouses::getContactPerson, query.getContactPerson()));
             }
-            if (!TextUtil.textIsEmpty(query.getStatus())) {
-                queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getStatus, query.getStatus()));
-            }
+
+                queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getStatus, 1));
         }
         IPage<Warehouses> warehousesList =this.page(warehousesPage,queryWrapper);
         IPage<WareHouseVO> wareHouseVOIPage = new Page<>();

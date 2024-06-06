@@ -21,6 +21,6 @@ public interface UserService {
      * @param username 用户名
      * @return {@link Users}
      */
-    UserVO getUserAuthInfo(String username);
+    Users getUserAuthInfo(String username);
 
 }

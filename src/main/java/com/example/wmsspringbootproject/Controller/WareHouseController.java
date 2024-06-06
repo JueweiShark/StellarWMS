@@ -38,11 +38,10 @@ public class WareHouseController {
     public Result<Boolean> addWareHouse(
             @RequestBody WareHouseForm wareHouseForm
     ){
-        System.out.println(wareHouseForm.getStatus());
         return service.saveWareHouseInfo(wareHouseForm);
     }
 
-    @DeleteMapping("/delete/{ids}'")
+    @DeleteMapping("/delete/{ids}")
     @Operation(summary = "删除仓库信息")
     public Result<Boolean> deleteWareHouse(
            @Parameter(description="需要删除的ids多个id用','隔开") @PathVariable("ids") String ids

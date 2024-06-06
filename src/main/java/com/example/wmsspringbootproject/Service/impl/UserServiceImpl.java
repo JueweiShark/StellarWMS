@@ -5,15 +5,14 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.wmsspringbootproject.Service.SysRoleService;
 import com.example.wmsspringbootproject.Service.UserService;
-import com.example.wmsspringbootproject.common.Annotation.Subject;
 import com.example.wmsspringbootproject.converter.UserConverter;
 import com.example.wmsspringbootproject.mapper.UserMapper;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
 import com.example.wmsspringbootproject.model.vo.Result;
-import com.example.wmsspringbootproject.model.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +26,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
     private final PasswordEncoder passwordEncoder;
 
     private final UserConverter userConverter;
+
+    private final SysRoleService roleService;
+
+
     @Override
     public List<Users> UserList(UserQuery userQuery) {
         String keyword = userQuery.getKeyword();
@@ -37,7 +40,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
         List<Users> usersList = this.list(
                 new LambdaQueryWrapper<Users>()
                         .like(StrUtil.isNotBlank(keyword), Users::getName, keyword)
-                        .eq(type != null, Users::getType, type)
                         .like(nick_name != null, Users::getNickName, nick_name)
                         .eq(email != null, Users::getEmail, email)
                         .eq(phone != null, Users::getPhone, phone)
@@ -46,7 +48,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
                                 Users::getName,
                                 Users::getNickName,
                                 Users::getPassword,
-                                Users::getType,
                                 Users::getAvatar,
                                 Users::getEmail,
                                 Users::getPhone,
@@ -131,10 +132,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
     }
 
     @Override
-    public UserVO getUserAuthInfo(String username) {
-        Users user= this.baseMapper.selectOne(new LambdaQueryWrapper<Users>()
-                .eq(Users::getName, username));
-        return userConverter.entity2Vo(user);
+    public Users getUserAuthInfo(String username) {
+        Users user = this.baseMapper.getAuthorityInfo(username);
+        user.setDataScope(roleService.getMaxDataScope(user.getRoles()));
+        return user;
     }
 
     public Result LoginByName(UserForm userForm, Users users){
