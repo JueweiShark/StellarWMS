@@ -32,7 +32,7 @@ public class DataPermissionAspect {
     }
 
     public static List<Method> getMethods(){
-        return methods;
+        return methods==null?new ArrayList<>():methods;
     }
 
 }

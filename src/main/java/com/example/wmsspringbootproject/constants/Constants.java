@@ -73,7 +73,6 @@ public interface Constants {
     }
 
 
-
     interface Default{
         int DELETED=0;
 

@@ -19,7 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -107,5 +109,26 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
     public Result<WareHouseVO> getWareHouseDetails(Integer id) {
         Warehouses warehouses =this.getById(id);
         return warehouses ==null ? Result.failed("没有该仓库") : Result.success(converter.entity2Vo(warehouses));
+    }
+
+    @Override
+    public Result<Map<String, Integer>> getWarehouseDistribute() {
+
+        Map<String, Integer> dist = new HashMap<>();
+        List<Warehouses> dataList=this.baseMapper.selectList(new LambdaQueryWrapper<Warehouses>()
+                .select(Warehouses::getAddress));
+        List<String> regionList=dataList.stream().map(Warehouses::getAddress)
+                .map(item->
+                        item.replaceAll("省.*|自治区.*|特别行政区.*",""))
+                .map(i->
+                        i.replaceAll(".*族",i+"自治区")).toList();
+        for (String region : regionList) {
+            if(!dist.containsKey(region)){
+                dist.put(region,1);
+            }else{
+                dist.put(region,dist.get(region)+1);
+            }
+        }
+        return Result.success(dist);
     }
 }

@@ -6,8 +6,10 @@ import com.example.wmsspringbootproject.constants.Constants;
 import com.example.wmsspringbootproject.model.form.WareHouseForm;
 import com.example.wmsspringbootproject.model.query.WarehouseQuery;
 import com.example.wmsspringbootproject.model.vo.WareHouseVO;
+import io.swagger.models.auth.In;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface WareHouseService {
@@ -20,4 +22,6 @@ public interface WareHouseService {
     Result<Boolean> removeWareHouseInfo(String ids);
 
     Result<WareHouseVO> getWareHouseDetails(Integer id);
+
+    Result<Map<String, Integer>> getWarehouseDistribute();
 }

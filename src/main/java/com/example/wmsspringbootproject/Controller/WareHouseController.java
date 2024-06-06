@@ -14,6 +14,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -64,6 +65,12 @@ public class WareHouseController {
             @RequestBody WareHouseForm wareHouseForm
     ){
         return service.updateWareHouseInfo(wareHouseForm);
+    }
+
+    @GetMapping("/warehouseResgion")
+    @Operation(summary = "获取仓库分布信息")
+    public Result<Map<String,Integer>> getWareHouseRegions(){
+        return service.getWarehouseDistribute();
     }
 
 }
