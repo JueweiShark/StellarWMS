@@ -21,7 +21,7 @@ import java.util.Map;
 @Tag(name = "02.仓库管理")
 @CrossOrigin
 
-@RequestMapping("/wareHouse")
+@RequestMapping("/warehouse")
 public class WareHouseController {
 
     private final WareHouseService service;
