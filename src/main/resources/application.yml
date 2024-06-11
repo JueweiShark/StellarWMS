@@ -34,8 +34,8 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/wms_project?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=UTC
-    username: root
+    url: jdbc:mysql://ktshark.icu:3306/wms_project?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=UTC
+    username: wms_project
     password: 111111
 
   servlet:
@@ -107,6 +107,7 @@ knife4j:
 qiniu:
   accessKey: sYzu-thtWUi48lG4fUNTnHk1PDyC2Y8SFoJjVJRe
   accessSecretKey: Yu7jRPPcH_U8uoennXuDM5zMHRWmipzD0tF1v4xJ
+  url: https://qiniuyun.ktshark.icu
 
 jwt:
   secret: "a34e856a68f461f708757c32281bc750"
