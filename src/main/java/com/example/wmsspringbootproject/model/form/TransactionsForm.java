@@ -33,4 +33,6 @@ public class TransactionsForm {
     @Schema(description = "仓库ID")
     private Long warehouseId;
     private int deleted;
+    @Schema(description = "进度")
+    private int progress;
 }

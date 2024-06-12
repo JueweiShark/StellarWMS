@@ -1,11 +1,12 @@
 package com.example.wmsspringbootproject.model.query;
 
+import com.example.wmsspringbootproject.common.base.BasePageQuery;
 import com.example.wmsspringbootproject.model.entity.TransactionProduct;
 import lombok.Data;
 
 import java.util.List;
 @Data
-public class TransactionsQuery {
+public class TransactionsQuery extends BasePageQuery {
     private Long id;
     private String title;
     private String description;
@@ -18,5 +19,6 @@ public class TransactionsQuery {
     private int status;
     private List<TransactionProduct> productList;
     private Long warehouseId;
+    private int progress;
 
 }
