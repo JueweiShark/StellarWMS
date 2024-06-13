@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class TransactionVO {
     @Schema(description = "事务ID")
-    private Long id;
+    private String id;
     @Schema(description = "事务标题")
     private String title;
     @Schema(description = "事务描述")
@@ -27,10 +27,11 @@ public class TransactionVO {
     @Schema(description = "事务截至时间")
     private String endTime;
     @Schema(description = "事务状态")
-    private String status;
-    @Schema(description = "产品列表")
-    private List<TransactionProduct> productList;
+    private int status;
+
     @Schema(description = "仓库ID")
     private Long warehouseId;
     private int deleted;
+    @Schema(description = "进度")
+    private int progress;
 }

@@ -19,4 +19,5 @@ public class Transactions {
     private String productIds;
     private Long warehouseId;
     private int deleted;
+    private int progress;
 }
