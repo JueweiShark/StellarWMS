@@ -15,10 +15,10 @@ spring:
 
 #        redis配置
     redis:
-      host: localhost
+      host: ktshark.icu
       port: 6379
       database: 6
-#      password: 123456
+      password: 123456
       timeout: 10s
       lettuce:
         pool:
