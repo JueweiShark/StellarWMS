@@ -22,6 +22,7 @@ public class Users {
     private String createTime;
     private String lastLogin;
     private int deleted;
+    private int status;
     @TableField(exist = false)
     private Integer dataScope;
 
@@ -29,4 +30,6 @@ public class Users {
 
     @TableField(exist = false)
     private Set<String> roles;
+    @TableField(exist = false)
+    private int typeId;
 }

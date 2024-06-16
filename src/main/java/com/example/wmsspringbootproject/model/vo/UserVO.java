@@ -14,8 +14,7 @@ public class UserVO {
     private String nickName;
     @Schema(description ="用户密码")
     private String password;
-    @Schema(description ="用户类型")
-    private int type;
+
     @Schema(description ="用户头像")
     private String avatar;
     @Schema(description ="用户电子邮件")
@@ -32,4 +31,10 @@ public class UserVO {
     private int deleted;
     @Schema(description = "数据权限范围")
     private Integer dataScope;
+    @Schema(description ="用户角色")
+    private int typeId;
+    @Schema(description ="用户状态")
+    private int status;
+    @Schema(description ="仓库id")
+    private int warehouseId;
 }
