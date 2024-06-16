@@ -8,8 +8,10 @@ import com.example.wmsspringbootproject.model.entity.SysRole;
 import com.example.wmsspringbootproject.model.entity.UserType;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
+import com.example.wmsspringbootproject.model.query.SysRoleQuery;
 import com.example.wmsspringbootproject.model.query.UserQuery;
 import com.example.wmsspringbootproject.common.result.Result;
+import com.example.wmsspringbootproject.model.vo.UserTypeVO;
 import com.example.wmsspringbootproject.model.vo.UserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -76,7 +78,9 @@ public class UserController {
     }
     @Operation(summary = "获取用户类型列表")
     @GetMapping("/getTypeList")
-    public Result<List<SysRole>> UserTypeList() {
-        return sysRoleService.getUserType();
+    public Result<IPage<UserTypeVO>> UserTypeList(
+            @ParameterObject SysRoleQuery query
+    ) {
+        return sysRoleService.getUserType(query);
     }
 }
