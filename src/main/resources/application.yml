@@ -12,9 +12,10 @@ spring:
   application:
     name: WMS
   data:
-    #    redis配置
+
+    #        redis配置
     redis:
-      host: 192.168.74.138
+      host: ktshark.icu
       port: 6379
       database: 6
       password: 123456
@@ -29,11 +30,13 @@ spring:
           max-idle: 8
           # 连接池中的最小空闲连接 默认0
           min-idle: 0
+
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/wms_project?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=UTC
-    username: root
-    password: 777777
+    url: jdbc:mysql://ktshark.icu:3306/wms_project?useUnicode=true&characterEncoding=UTF-8&serverTimeZone=UTC
+    username: wms_project
+    password: 111111
 
   servlet:
     multipart:
@@ -86,6 +89,7 @@ springdoc:
       packages-to-scan: com.example.wmsspringbootproject.controller # 生成文档所需的扫包路径，一般为启动类目录
       paths-to-match: '/**' #按路径匹配
 
+
 #knife4j 增强配置
 knife4j:
   enable: true #是否启用增强设置
@@ -106,6 +110,7 @@ knife4j:
 qiniu:
   accessKey: sYzu-thtWUi48lG4fUNTnHk1PDyC2Y8SFoJjVJRe
   accessSecretKey: Yu7jRPPcH_U8uoennXuDM5zMHRWmipzD0tF1v4xJ
+  url: https://qiniuyun.ktshark.icu
 
 jwt:
   secret: "a34e856a68f461f708757c32281bc750"
@@ -113,6 +118,3 @@ jwt:
 #wx:
 #  appid: wx07e2e8b77ec0fc22
 #  appsecret: fb4634c352fdffd1ae99ec5288a4463b
-
-
-

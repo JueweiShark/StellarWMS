@@ -44,7 +44,7 @@ public class ImChatUserMessageController {
 
     //TODO: 获取系统消息
     @GetMapping("/system")
-    @Operation(summary = "获取系统消息")
+    @Operation(summary = "获取系统消息列表")
     public Result<List<ImMessage>> getSystemMessage() {
         Long uid= SecurityUtils.getUserId();
         List<ImChatUserMessage> messages=imChatUserMessageService.lambdaQuery()
@@ -62,7 +62,7 @@ public class ImChatUserMessageController {
     }
     //TODO: 获取用户消息
     @GetMapping("/friend")
-    @Operation(summary = "获取用户消息")
+    @Operation(summary = "获取用户消息列表")
     public Result<Page<UserMessageVO>> getUserMessage(@RequestParam("id")String id,
                                                       @RequestParam("currentTime")String currentTime,
                                                       @RequestParam("size")String size,
