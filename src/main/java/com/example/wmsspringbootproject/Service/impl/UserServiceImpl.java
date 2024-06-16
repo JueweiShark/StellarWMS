@@ -178,6 +178,12 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
     }
 
     @Override
+    public Users getRootUser() {
+        return this.baseMapper.getRootUser();
+    }
+
+
+    @Override
     public Users getUserAuthInfo(String username) {
         Users user = this.baseMapper.getAuthorityInfo(username);
         user.setDataScope(roleService.getMaxDataScope(user.getRoles()));

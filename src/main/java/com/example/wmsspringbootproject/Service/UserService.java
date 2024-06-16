@@ -23,5 +23,5 @@ public interface UserService {
      * @return {@link Users}
      */
     Users getUserAuthInfo(String username);
-
+    Users getRootUser();
 }
