@@ -6,9 +6,6 @@ import com.example.wmsspringbootproject.model.entity.Warehouses;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-@DataPermission(warehouseIdColumnName="id")
 public interface WareHouseMapper extends BaseMapper<Warehouses> {
-
-
 
 }

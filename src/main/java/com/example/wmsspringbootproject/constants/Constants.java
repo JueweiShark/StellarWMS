@@ -9,6 +9,15 @@ import java.util.List;
 
 public interface Constants {
 
+    Integer TOKEN_EXPIRE=7200;
+
+    Integer EXPIRE=1800;
+
+    String USER_CACHE="user_";
+
+    String TOKEN_HEADER = "Authorization";
+
+
     interface PageQuery{
         int DEFAULT_PAGE=1;
         int DEFAULT_SIZE=10;
@@ -78,5 +87,17 @@ public interface Constants {
 
         int PREPARED=1;//已就绪
 
+    }
+
+    interface history{
+        /**
+         * IP历史记录缓存
+         */
+         String IP_HISTORY = "ip_history";
+         String IP_HISTORY_STATISTICS = "ip_history_statistics";
+        String IP_HISTORY_PROVINCE = "ip_history_province";
+        String IP_HISTORY_IP = "ip_history_ip";
+        String IP_HISTORY_HOUR = "ip_history_hour";
+         String IP_HISTORY_COUNT = "ip_history_count";
     }
 }

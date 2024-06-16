@@ -1,8 +1,10 @@
 package com.example.wmsspringbootproject.Utils;
 
 import cn.hutool.core.util.CharUtil;
+import com.example.wmsspringbootproject.common.result.PageResult;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,8 +24,38 @@ public class TextUtil {
         return simpleDateFormat.format(date);
     }
 
+    public static Date parestDate(String date,String pattern){
+        try{
+            if(!textIsEmpty(pattern)){
+                simpleDateFormat.applyPattern(pattern);
+            }
+            return simpleDateFormat.parse(date);
+        }catch (ParseException pe){
+            System.out.println(pe.getMessage());
+            return null;
+        }
+    }
+
+    public static String removeHtml(String content) {
+        return content.replace("<", "《").replace(">", "》");
+    }
+
     public static String formatDate(Date date){
         return simpleDateFormat.format(date);
+    }
+
+    /**
+     * @apiNote 获取任意时间之前的时间
+     * @param time 毫秒数
+     * @param targetTime 相较于的时间 默认是当前时间
+     * @return 格式化之后的时间 yyyy-MM-dd HH:mm:ss
+     */
+    public static String getBeforeAnyTime(Date targetTime,Long time){
+        if(targetTime==null){
+            targetTime=new Date();
+        }
+        long resultTime=targetTime.getTime()-time;
+        return formatDate(new Date(resultTime));
     }
 
     public static String toCamelCase(CharSequence name,char symbol) {

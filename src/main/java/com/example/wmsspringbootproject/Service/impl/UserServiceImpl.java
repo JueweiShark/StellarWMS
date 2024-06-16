@@ -7,12 +7,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.wmsspringbootproject.Service.SysRoleService;
 import com.example.wmsspringbootproject.Service.UserService;
+import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.converter.UserConverter;
 import com.example.wmsspringbootproject.mapper.UserMapper;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
-import com.example.wmsspringbootproject.model.vo.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,7 +64,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
     }
 
     @Override
-    public Result addUser(UserForm userForm) {
+    public Result<Users> addUser(UserForm userForm) {
         String name = userForm.getName();
         userForm.setName(name);
         String email=userForm.getEmail();
@@ -75,16 +75,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
                 .eq(Users::getEmail, email)
         );
         if(count!=0){
-            return Result.fail("407","该用户名已存在");
+            return Result.result("407","该用户名已存在",null);
         }
         if(count1!=0){
-            return Result.fail("408","该邮箱号已存在");
+            return Result.result("408","该邮箱号已存在",null);
         }
         Users entity = userConverter.form2Entity(userForm);
         entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         boolean result = this.save(entity);
         if(!result){
-            return Result.fail("401","操作失败");
+            return Result.result("401","操作失败",null);
         }
         return Result.success(entity);
     }
@@ -138,17 +138,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
         return user;
     }
 
-    public Result LoginByName(UserForm userForm, Users users){
+    @Override
+    public Users getRootUser() {
+        return this.baseMapper.getRootUser();
+    }
+
+
+    public Result<UserForm> LoginByName(UserForm userForm, Users users){
         if(userForm.getName().equals(users.getName())
             && userForm.getPassword().equals(users.getPassword()) ){
             return Result.success(userForm);
         }
-        return Result.fail("404","找不到该用户");
+        return Result.result("404","找不到该用户",userForm);
     }
-    public Result LoginByEMail(UserForm userForm, Users users){
+    public Result<UserForm> LoginByEMail(UserForm userForm, Users users){
         if(userForm.getEmail().equals(users.getEmail())){
             return Result.success(userForm);
         }
-        return Result.fail("405","找不到该用户");
+        return Result.result("405","找不到该用户",userForm);
     }
 }

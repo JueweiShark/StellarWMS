@@ -6,12 +6,13 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import org.springframework.data.annotation.Transient;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @Data
-public class Users {
+public class Users implements Serializable {
     @TableId(type= IdType.AUTO)
-    private int id;
+    private Integer id;
     private String name;
     private String nickName;
     private String password;

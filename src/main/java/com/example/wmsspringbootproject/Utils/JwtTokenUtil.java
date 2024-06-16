@@ -65,7 +65,7 @@ public class JwtTokenUtil {
         return claims;
     }
 
-    public Authentication getAuthentication(String token){
+    public SysUserDetails getUser(String token){
         Claims claims=this.getClaimsFromToken(token);
 
         SysUserDetails userDetails=new SysUserDetails();
@@ -73,6 +73,13 @@ public class JwtTokenUtil {
         userDetails.setId(Convert.toInt(claims.get(JwtClaimConstants.USER_ID)));
         userDetails.setDataScope(Convert.toInt(claims.get(JwtClaimConstants.DATASCOPE)));
         userDetails.setWarehouseId(Convert.toStr(claims.get(JwtClaimConstants.WAREHOUSE_ID)));
+        return userDetails;
+    }
+
+    public Authentication getAuthentication(String token){
+        Claims claims=this.getClaimsFromToken(token);
+
+        SysUserDetails userDetails=getUser(token);
 
         Set<SimpleGrantedAuthority> authorities=Convert.toList(claims.get(JwtClaimConstants.AUTHORITIES))
                 .stream().map(item->
@@ -146,6 +153,10 @@ public class JwtTokenUtil {
             return bearerToken.substring(4);
         }
         return null;
+    }
+
+    public String getUsername(String tokenWithoutPrefix) {
+        return Jwts.parser().setSigningKey(key).parseClaimsJws(tokenWithoutPrefix).getBody().getSubject();
     }
 }
 

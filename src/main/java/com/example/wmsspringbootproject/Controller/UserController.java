@@ -2,11 +2,11 @@ package com.example.wmsspringbootproject.Controller;
 
 import com.example.wmsspringbootproject.Service.AuthUserService;
 import com.example.wmsspringbootproject.Service.UserService;
+import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.dto.LoginResult;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
-import com.example.wmsspringbootproject.model.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +36,7 @@ public class UserController {
     }
     @Operation(summary = "新增用户")
     @PostMapping("/addUser")
-    public Result addUser(
+    public Result<Users> addUser(
             @Valid @RequestBody UserForm formData
     ) {
        return userService.addUser(formData);
@@ -57,7 +57,7 @@ public class UserController {
     }
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public Result Login(
+    public Result<LoginResult> Login(
             @Valid @RequestBody UserForm formData
     ) {
         return authUserService.Login(formData);

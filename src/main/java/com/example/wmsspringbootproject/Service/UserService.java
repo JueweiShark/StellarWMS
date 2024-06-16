@@ -1,17 +1,17 @@
 package com.example.wmsspringbootproject.Service;
 
-import com.example.wmsspringbootproject.model.dto.LoginResult;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
-import com.example.wmsspringbootproject.model.vo.Result;
-import com.example.wmsspringbootproject.model.vo.UserVO;
+
 
 import java.util.List;
 
-public interface UserService {
+public interface UserService extends IService<Users> {
     List<Users> UserList(UserQuery userQuery);
-    Result addUser(UserForm  userForm);
+    Result<Users> addUser(UserForm  userForm);
     Boolean updateUser(UserForm userForm);
     Boolean deleteUser(int id);
 
@@ -22,5 +22,7 @@ public interface UserService {
      * @return {@link Users}
      */
     Users getUserAuthInfo(String username);
+
+    Users getRootUser();
 
 }

@@ -1,7 +1,7 @@
 package com.example.wmsspringbootproject.Controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.wmsspringbootproject.Service.WareHouseService;
+import com.example.wmsspringbootproject.Utils.SecurityUtils;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.form.WareHouseForm;
 import com.example.wmsspringbootproject.model.query.WarehouseQuery;
@@ -10,10 +10,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -21,6 +21,7 @@ import java.util.Map;
 @Tag(name = "02.仓库管理")
 @CrossOrigin
 
+@Slf4j
 @RequestMapping("/wareHouse")
 public class WareHouseController {
 
@@ -52,11 +53,10 @@ public class WareHouseController {
 
     @GetMapping("/list")
     @Operation(summary = "获取仓库列表")
-    public Result<IPage<WareHouseVO>> listWareHouse(
+    public Result listWareHouse(
         @ParameterObject WarehouseQuery query
     ){
-        System.out.println(query.getStatus());
-        return service.warehouseList(query);
+        return SecurityUtils.checkResponse(service.warehouseList(query));
     }
 
     @PutMapping("/update")
@@ -70,7 +70,10 @@ public class WareHouseController {
     @GetMapping("/warehouseResgion")
     @Operation(summary = "获取仓库分布信息")
     public Result<Map<String,Integer>> getWareHouseRegions(){
+        System.out.println(SecurityUtils.getUser().toString());
         return service.getWarehouseDistribute();
     }
+
+
 
 }
