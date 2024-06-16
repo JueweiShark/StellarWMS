@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface WareHouseConverter {
-    UserForm entity2Form(Warehouses entity);
+    WareHouseForm entity2Form(Warehouses entity);
     WareHouseVO entity2Vo(Warehouses entity);
 
     Warehouses Vo2entity(WareHouseVO vo);

@@ -4,15 +4,23 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.wmsspringbootproject.Service.SysRoleService;
+import com.example.wmsspringbootproject.Service.SysUserTypeService;
 import com.example.wmsspringbootproject.Service.UserService;
+import com.example.wmsspringbootproject.Utils.TextUtil;
+import com.example.wmsspringbootproject.common.result.ResultCode;
+import com.example.wmsspringbootproject.model.entity.*;
+import com.example.wmsspringbootproject.model.query.ProductQuery;
+import com.example.wmsspringbootproject.model.vo.ProductVO;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.converter.UserConverter;
 import com.example.wmsspringbootproject.mapper.UserMapper;
-import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
+import com.example.wmsspringbootproject.model.vo.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,43 +36,59 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
     private final UserConverter userConverter;
 
     private final SysRoleService roleService;
+    private final SysUserTypeService sysUserTypeService;
 
 
-    @Override
-    public List<Users> UserList(UserQuery userQuery) {
-        String keyword = userQuery.getKeyword();
-        String type = userQuery.getType();
-        String nick_name=userQuery.getNick_name();
-        String email=userQuery.getEmail();
-        String phone=userQuery.getPhone();
-        List<Users> usersList = this.list(
-                new LambdaQueryWrapper<Users>()
-                        .like(StrUtil.isNotBlank(keyword), Users::getName, keyword)
-                        .like(nick_name != null, Users::getNickName, nick_name)
-                        .eq(email != null, Users::getEmail, email)
-                        .eq(phone != null, Users::getPhone, phone)
-                        .select(
-                                Users::getId,
-                                Users::getName,
-                                Users::getNickName,
-                                Users::getPassword,
-                                Users::getAvatar,
-                                Users::getEmail,
-                                Users::getPhone,
-                                Users::getWeChatName,
-                                Users::getCreateTime,
-                                Users::getLastLogin,
-                                Users::getDeleted
-                        )
-        );
-        if (CollectionUtil.isEmpty(usersList)) {
-            return Collections.EMPTY_LIST;
+//
+@Override
+public Result<IPage<UserVO>> UserList(UserQuery query) {
+    LambdaQueryWrapper<Users> queryWrapper=new LambdaQueryWrapper<>();
+    Page<Users> userPage=new Page<>(query.getPageNum(),query.getPageSize());
+    if (query != null) {
+        queryWrapper.gt(Users::getId,0);
+
+        if (!TextUtil.textIsEmpty(query.getKeyword())) {
+            queryWrapper.and(wrapper -> wrapper.like(Users::getName, query.getKeyword()));
         }
-        return usersList;
+        if (!TextUtil.textIsEmpty(query.getNick_name())) {
+            queryWrapper.and(wrapper -> wrapper.like(Users::getNickName, query.getNick_name()));
+        }
+        if (!TextUtil.textIsEmpty(query.getPhone())) {
+            queryWrapper.and(wrapper -> wrapper.like(Users::getPhone, query.getPhone()));
+        }
+        if (!TextUtil.textIsEmpty(query.getEmail())) {
+            queryWrapper.and(wrapper -> wrapper.like(Users::getEmail, query.getEmail()));
+        }
+        if (query.getStatus()!=0) {
+            queryWrapper.and(wrapper -> wrapper.like(Users::getStatus, query.getStatus()));
+        }
+        if (query.getTypeId()!=0) {
+            queryWrapper.and(wrapper -> wrapper.like(Users::getTypeId, query.getTypeId()));
+        }
+        if (!TextUtil.textIsEmpty(query.getCreateTime())) {
+            queryWrapper.and(wrapper -> wrapper.ge(Users::getCreateTime, query.getCreateTime()));
+        }
+        if (!TextUtil.textIsEmpty(query.getEndTime())) {
+            queryWrapper.and(wrapper -> wrapper.le(Users::getCreateTime, query.getEndTime()));
+        }
+        queryWrapper.and(wrapper -> wrapper.eq(Users::getDeleted, 1));
     }
+    IPage<Users> userList =this.page(userPage,queryWrapper);
+    IPage<UserVO> userVOIPage = new Page<>();
+    userVOIPage.setRecords(userList.getRecords().stream().map(user -> {
+        UserVO userVO = userConverter.entity2Vo(user);
+        userVO.setTypeId(sysUserTypeService.getUserTypeByUid(userVO.getId()).getRoleId());
+        return userVO;
+    }).toList());
+    userVOIPage.setPages(userList.getPages());
+    userVOIPage.setCurrent(userList.getCurrent());
+    userVOIPage.setSize(userList.getSize());
+    userVOIPage.setTotal(userList.getTotal());
+    return Result.success(userVOIPage);
+}
 
     @Override
-    public Result<Users> addUser(UserForm userForm) {
+    public Result<Boolean> addUser(UserForm userForm) {
         String name = userForm.getName();
         userForm.setName(name);
         String email=userForm.getEmail();
@@ -75,22 +99,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
                 .eq(Users::getEmail, email)
         );
         if(count!=0){
-            return Result.result("407","该用户名已存在",null);
+            return Result.failed(ResultCode.USER_NAME_EXISTS);
         }
         if(count1!=0){
-            return Result.result("408","该邮箱号已存在",null);
+            return Result.failed(ResultCode.USER_EMAIL_EXISTS);
         }
         Users entity = userConverter.form2Entity(userForm);
         entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+        entity.setDeleted(1);
         boolean result = this.save(entity);
-        if(!result){
-            return Result.result("401","操作失败",null);
-        }
-        return Result.success(entity);
+        sysUserTypeService.addUserType(entity.getId(),userForm.getTypeId());
+        return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
     }
 
     @Override
-    public Boolean updateUser(UserForm userForm) {
+    public Result<Boolean> updateUser(UserForm userForm) {
         int id=userForm.getId();
         String name = userForm.getName();
         String phone=userForm.getPhone();
@@ -107,28 +130,51 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
                 .eq(Users::getEmail, email)
                 .ne(Users::getId, id)
         );
-        Assert.isTrue(count == 0, "该用户名已存在");
-        Assert.isTrue(count1 == 0, "该手机号已存在");
-        Assert.isTrue(count2 == 0, "该邮箱号已存在");
+        if(count!=0){
+            return Result.failed(ResultCode.USER_NAME_EXISTS);
+        }
+        if(count1!=0){
+            return Result.failed(ResultCode.USER_PHONE_EXISTS);
+        }
+        if(count2!=0){
+            return Result.failed(ResultCode.USER_EMAIL_EXISTS);
+        }
         Users entity = userConverter.form2Entity(userForm);
         entity.setId(id);
+        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+        sysUserTypeService.updateUserType(id,userForm.getTypeId());
         boolean result = this.updateById(entity);
-        Assert.isTrue(result, "用户修改失败");
-        return result;
+        return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
     }
 
     @Override
-    public Boolean deleteUser(int id) {
-        Users users1 =this.baseMapper.selectOne(new LambdaQueryWrapper<Users>()
-                .eq(id>0, Users::getId,id)
-        );
-        boolean result=false;
-        if(users1 !=null){
-            users1.setDeleted(1);
-            result=this.updateById(users1);
+    public Result<Boolean> deleteUser(String ids) {
+        String[] idArray=ids.split(",");
+        if(idArray.length>1){
+            for (String id : idArray) {
+                Users users=this.getById(id);
+                users.setDeleted(0);
+                this.baseMapper.updateById(users);
+            }
+            return com.example.wmsspringbootproject.common.result.Result.success();
+        }else{
+            Users users=this.getById(ids);
+            users.setDeleted(0);
+            Boolean result=this.baseMapper.updateById(users)>0;
+            return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
         }
-        Assert.isTrue(result, "用户删除失败");
-        return result;
+    }
+
+    @Override
+    public Result<Boolean> resetPassword(int uid) {
+        Users users=this.baseMapper.selectById(uid);
+        if(users!=null ) {
+            users.setPassword(passwordEncoder.encode("123"));
+            Boolean result=this.lambdaUpdate().eq(Users::getId, uid).update(users);
+            return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
+        }else{
+            return Result.failed(ResultCode.USER_NOT_EXIST);
+        }
     }
 
     @Override
@@ -138,23 +184,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
         return user;
     }
 
-    @Override
-    public Users getRootUser() {
-        return this.baseMapper.getRootUser();
-    }
-
-
-    public Result<UserForm> LoginByName(UserForm userForm, Users users){
+    public Result LoginByName(UserForm userForm, Users users){
         if(userForm.getName().equals(users.getName())
             && userForm.getPassword().equals(users.getPassword()) ){
             return Result.success(userForm);
         }
-        return Result.result("404","找不到该用户",userForm);
+        return Result.failed(ResultCode.USER_NOT_EXIST);
     }
-    public Result<UserForm> LoginByEMail(UserForm userForm, Users users){
+    public Result LoginByEMail(UserForm userForm, Users users){
         if(userForm.getEmail().equals(users.getEmail())){
             return Result.success(userForm);
         }
-        return Result.result("405","找不到该用户",userForm);
+        return Result.failed(ResultCode.USER_NOT_EXIST);
     }
 }
