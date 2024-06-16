@@ -10,7 +10,9 @@ public class Transactions {
     private String title;
     private String description;
     private String  transactionType;
-    private long userId;
+    private long creatorId;
+    private long confirmatorId;
+    private long auditorId;
     private String createTime;
     private String updateTime;
     private String startTime;
