@@ -16,8 +16,12 @@ public class TransactionVO {
     private String description;
     @Schema(description = "事务类型")
     private String transactionType;
-    @Schema(description = "用户ID")
-    private Long userId;
+    @Schema(description = "创建人ID")
+    private long creatorId;
+    @Schema(description = "确认人ID")
+    private long confirmatorId;
+    @Schema(description = "审核人ID")
+    private long auditorId;
     @Schema(description = "创建时间")
     private String createTime;
     @Schema(description = "更新时间")
@@ -28,7 +32,6 @@ public class TransactionVO {
     private String endTime;
     @Schema(description = "事务状态")
     private int status;
-
     @Schema(description = "仓库ID")
     private Long warehouseId;
     private int deleted;

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +78,22 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Products> imp
     @Subject(filedName = "warehouseId",observer = WareHouseServiceImpl.class)
     @Override
     public Result<Boolean> saveProductInfo(ProductForm form) {
+        if (!form.getTypeId().matches("\\d+")){
+            LambdaQueryWrapper<ProductTypes> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ProductTypes::getName, form.getTypeId());
+            List<ProductTypes> products = productTypeMapper.selectList(queryWrapper);
+            if (products == null || products.isEmpty()) {
+                ProductTypes productType = new ProductTypes();
+                productType.setName(form.getTypeId());
+                productTypeMapper.insert(productType);
+                form.setTypeId(String.valueOf(productType.getId()));
+            }
+            else {
+                form.setTypeId(String.valueOf(products.get(0).getId()));
+            }
+        }
         Products products =converter.form2Entity(form);
+
         products.setCreateTime(TextUtil.formatDate(new Date()));
         products.setDeleted(Constants.Default.DELETED);
         Boolean result=this.save(products);

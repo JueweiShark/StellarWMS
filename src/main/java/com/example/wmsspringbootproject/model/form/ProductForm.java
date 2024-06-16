@@ -11,7 +11,7 @@ public class ProductForm {
     @Schema(description ="产品名称")
     private String name;
     @Schema(description ="产品类型id")
-    private int typeId;
+    private String typeId;
     @Schema(description ="产品图片")
     private String picture;
     @Schema(description ="产品入库时间")

@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.wmsspringbootproject.Service.ProductTypeService;
 import com.example.wmsspringbootproject.Service.TransactionProductService;
 import com.example.wmsspringbootproject.Service.TransactionService;
 import com.example.wmsspringbootproject.Utils.TextUtil;
 import com.example.wmsspringbootproject.converter.TransactionConverter;
+import com.example.wmsspringbootproject.mapper.ProductTypeMapper;
 import com.example.wmsspringbootproject.mapper.TransactionMapper;
+import com.example.wmsspringbootproject.model.entity.ProductTypes;
 import com.example.wmsspringbootproject.model.entity.Products;
 import com.example.wmsspringbootproject.model.entity.TransactionProduct;
 import com.example.wmsspringbootproject.model.entity.Transactions;
@@ -32,7 +35,8 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     private TransactionProductService productService;
     @Autowired
     private TransactionConverter transactionConverter;
-
+    @Autowired
+    private ProductTypeMapper productTypeMapper;
 
     @Override
     public Result<IPage<TransactionVO>> transactionList(TransactionsQuery query) {
