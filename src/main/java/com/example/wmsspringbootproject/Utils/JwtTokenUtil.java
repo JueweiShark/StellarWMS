@@ -103,6 +103,9 @@ public class JwtTokenUtil {
      */
     public boolean validateToken(String token) {
         Date expiredDate = getExpiredDateFromToken(token);
+        if(expiredDate==null){
+            return false;
+        }
         return new Date().before(expiredDate);
     }
 
@@ -119,6 +122,9 @@ public class JwtTokenUtil {
      */
     public Date getExpiredDateFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
+        if(claims==null){
+            return null;
+        }
         return claims.getExpiration();
     }
 
