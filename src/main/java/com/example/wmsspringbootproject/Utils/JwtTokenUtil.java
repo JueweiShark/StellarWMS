@@ -155,7 +155,6 @@ public class JwtTokenUtil {
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader(HttpHeaders.AUTHORIZATION);
-        bearerToken="wms "+bearerToken;
         if (bearerToken != null&&bearerToken.startsWith("wms ")) {
             return bearerToken.substring(4);
         }
