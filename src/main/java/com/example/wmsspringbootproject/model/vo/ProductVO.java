@@ -34,4 +34,5 @@ public class ProductVO {
     private int deleted;
     private Warehouses warehouses;
     private ProductTypes productTypes;
+
 }

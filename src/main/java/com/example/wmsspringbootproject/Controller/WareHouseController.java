@@ -55,7 +55,7 @@ public class WareHouseController {
     public Result<IPage<WareHouseVO>> listWareHouse(
         @ParameterObject WarehouseQuery query
     ){
-        System.out.println(query.getStatus());
+        System.out.println(query);
         return service.warehouseList(query);
     }
 

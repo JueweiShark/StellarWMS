@@ -16,6 +16,7 @@ import com.example.wmsspringbootproject.mapper.ProductTypeMapper;
 import com.example.wmsspringbootproject.mapper.WareHouseMapper;
 import com.example.wmsspringbootproject.model.entity.Products;
 import com.example.wmsspringbootproject.model.entity.ProductTypes;
+import com.example.wmsspringbootproject.model.entity.Warehouses;
 import com.example.wmsspringbootproject.model.form.ProductForm;
 import com.example.wmsspringbootproject.model.query.ProductQuery;
 import com.example.wmsspringbootproject.model.vo.ProductVO;
@@ -55,7 +56,11 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Products> imp
             if (!TextUtil.textIsEmpty(query.getCreateTime())) {
                 queryWrapper.and(wrapper -> wrapper.like(Products::getCreateTime, query.getCreateTime()));
             }
-            queryWrapper.and(wrapper -> wrapper.eq(Products::getDeleted, 0));
+            if (TextUtil.isNotEmpty(query.getDeleted())){
+                queryWrapper.eq(Products::getDeleted,query.getDeleted());
+            }else {
+                queryWrapper.and(wrapper -> wrapper.eq(Products::getDeleted, 1));
+            }
         }
         IPage<Products> productList =this.page(productPage,queryWrapper);
         IPage<ProductVO> productVOIPage = new Page<>();
@@ -119,13 +124,13 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Products> imp
         if(idArray.length>1){
             for (String id : idArray) {
                 Products products =this.getById(id);
-                products.setDeleted(1);
+                products.setDeleted(2);
                 this.baseMapper.updateById(products);
             }
             return Result.success();
         }else{
             Products products =this.getById(ids);
-            products.setDeleted(1);
+            products.setDeleted(2);
             Boolean result=this.baseMapper.updateById(products)>0;
             return result ? Result.success(result) : Result.failed("删除产品信息失败");
         }
@@ -134,6 +139,14 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Products> imp
     @Override
     public Result<ProductVO> getProductDetails(Integer id) {
         Products products =this.getById(id);
-        return products ==null ? Result.failed("没有该产品") : Result.success(converter.entity2Vo(products));
+        if(products ==null){
+            return Result.failed("没有该产品");
+        }
+        ProductVO productVO = converter.entity2Vo(products);
+        ProductTypes productTypes = productTypeMapper.selectById(productVO.getTypeId());
+        Warehouses warehouses = wareHouseMapper.selectById(productVO.getWarehouseId());
+        productVO.setTypeName(productTypes.getName());
+        productVO.setWarehouseName(warehouses.getName());
+        return Result.success(productVO);
     }
 }

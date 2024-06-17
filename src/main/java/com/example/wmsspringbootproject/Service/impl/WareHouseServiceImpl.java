@@ -36,7 +36,6 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         Page<Warehouses> warehousesPage=new Page<>(query.getPageNum(),query.getPageSize());
         if (query != null) {
             queryWrapper.gt(Warehouses::getId,0);
-
             if (!TextUtil.textIsEmpty(query.getName())) {
                 queryWrapper.and(wrapper -> wrapper.like(Warehouses::getName, query.getName()));
             }
@@ -52,7 +51,12 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
             if (query.getStatus()!=-1) {
                 queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getStatus, query.getStatus()));
             }
-            queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getDeleted, 0));
+            if(TextUtil.isNotEmpty(query.getDeleted())) {
+                queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getDeleted, query.getDeleted()));
+            }else {
+                queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getDeleted, 1));
+            }
+
         }
         IPage<Warehouses> warehousesList =this.page(warehousesPage,queryWrapper);
         IPage<WareHouseVO> wareHouseVOIPage = new Page<>();
@@ -93,13 +97,13 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         if(idArray.length>1){
             for (String id : idArray) {
                 Warehouses warehouses=this.getById(id);
-                warehouses.setDeleted(1);
+                warehouses.setDeleted(2);
                 this.baseMapper.updateById(warehouses);
             }
             return Result.success();
         }else{
             Warehouses warehouses=this.getById(ids);
-            warehouses.setDeleted(1);
+            warehouses.setDeleted(2);
             Boolean result=this.baseMapper.updateById(warehouses)>0;
             return result ? Result.success(result) : Result.failed("删除仓库信息失败");
         }
