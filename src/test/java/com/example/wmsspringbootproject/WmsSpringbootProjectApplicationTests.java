@@ -1,5 +1,7 @@
 package com.example.wmsspringbootproject;
 
+import com.example.wmsspringbootproject.Utils.TextUtil;
+import com.example.wmsspringbootproject.constants.Constants;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -10,10 +12,9 @@ class WmsSpringbootProjectApplicationTests {
 
     @Test
     void contextLoads() {
-        String message = "Hello World!";
-        for (Field declaredField : message.getClass().getDeclaredFields()) {
-            System.out.println(declaredField.getName());
-        }
+//        String date=TextUtil.getBeforeAnyTime(null,Constants.TimeValueInMillions.MONTH);
+//        System.out.println(date);
+        System.out.println("111111111");
     }
 
 }

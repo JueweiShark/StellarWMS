@@ -58,4 +58,11 @@
         WHERE
             t1.name = #{username} AND t1.deleted = 1
     </select>
+
+    <select id="getRootUser" resultType="com.example.wmsspringbootproject.model.entity.Users">
+        select * from users t1
+                          LEFT JOIN sys_user_type t2 ON t2.user_id = t1.id
+                          LEFT JOIN user_type t3 ON t3.id = t2.role_id
+        where t3.code= 'root' limit 1
+    </select>
 </mapper>

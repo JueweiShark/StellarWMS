@@ -18,6 +18,7 @@ public enum ResultCode implements IResultCode, Serializable {
     SUCCESS("200", "一切ok"),
 
     USER_ERROR("A0001", "用户端错误"),
+
     REPEAT_SUBMIT_ERROR("A0002", "您的请求已提交，请不要重复提交或等待片刻再尝试。"),
 
     USER_LOGIN_ERROR("A0200", "用户登录异常"),
@@ -44,6 +45,10 @@ public enum ResultCode implements IResultCode, Serializable {
     PARAM_ERROR("A0400", "用户请求参数错误"),
     RESOURCE_NOT_FOUND("A0401", "请求资源不存在"),
     PARAM_IS_NULL("A0410", "请求必填参数为空"),
+    USER_OPERATE_ERROR("U0501", "操作失败"),
+    USER_NAME_EXISTS("U0501", "用户名已存在"),
+    USER_PHONE_EXISTS("U0502", "手机号已存在"),
+    USER_EMAIL_EXISTS("U0503", "电子邮箱已存在"),
 
     USER_UPLOAD_FILE_ERROR("A0700", "用户上传文件异常"),
     USER_UPLOAD_FILE_TYPE_NOT_MATCH("A0701", "用户上传文件类型不匹配"),

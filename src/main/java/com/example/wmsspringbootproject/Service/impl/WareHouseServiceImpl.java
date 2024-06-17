@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.wmsspringbootproject.Service.WareHouseService;
 import com.example.wmsspringbootproject.Utils.TextUtil;
+import com.example.wmsspringbootproject.common.Annotation.DataPermission;
+import com.example.wmsspringbootproject.common.Annotation.LogNote;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.constants.Constants;
 import com.example.wmsspringbootproject.converter.WareHouseConverter;
@@ -29,7 +31,9 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
 
     private final WareHouseConverter converter;
 
+    @LogNote(description = "获取仓库列表")
     @Override
+    @DataPermission(warehouseIdColumnName="id")
     public Result<IPage<WareHouseVO>> warehouseList(WarehouseQuery query) {
         System.out.println("Status是:"+query.getStatus());
         LambdaQueryWrapper<Warehouses> queryWrapper=new LambdaQueryWrapper<>();
@@ -68,6 +72,7 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         return Result.success(wareHouseVOIPage);
     }
 
+    @LogNote(description = "添加仓库记录")
     @Override
     public Result<Boolean> saveWareHouseInfo(WareHouseForm form) {
         Warehouses warehouses =converter.form2Entity(form);
@@ -77,6 +82,7 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         return Result.success(result);
     }
 
+    @LogNote(description = "更新仓库记录")
     @Override
     public Result<Boolean> updateWareHouseInfo(WareHouseForm form) {
         Warehouses warehouses =this.getById(form.getId());
@@ -91,6 +97,7 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         return Result.failed("仓库信息不存在");
     }
 
+    @LogNote(description = "删除仓库记录")
     @Override
     public Result<Boolean> removeWareHouseInfo(String ids) {
         String[] idArray=ids.split(",");
@@ -109,12 +116,14 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         }
     }
 
+    @LogNote(description = "获取仓库详情")
     @Override
     public Result<WareHouseVO> getWareHouseDetails(Integer id) {
         Warehouses warehouses =this.getById(id);
         return warehouses ==null ? Result.failed("没有该仓库") : Result.success(converter.entity2Vo(warehouses));
     }
 
+    @LogNote(description = "获取仓库分布统计数据")
     @Override
     public Result<Map<String, Integer>> getWarehouseDistribute() {
 

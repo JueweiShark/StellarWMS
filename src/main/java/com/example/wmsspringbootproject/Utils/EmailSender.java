@@ -1,6 +1,7 @@
 package com.example.wmsspringbootproject.Utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -11,6 +12,7 @@ import java.net.URL;
 import java.util.*;
 
 @Slf4j
+@Component
 public class EmailSender {
     private static final String TAG = "EmailSender";
     private static Session session;

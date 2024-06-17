@@ -1,12 +1,19 @@
 package com.example.wmsspringbootproject.Controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.wmsspringbootproject.Service.AuthUserService;
+import com.example.wmsspringbootproject.Service.SysRoleService;
 import com.example.wmsspringbootproject.Service.UserService;
 import com.example.wmsspringbootproject.model.dto.LoginResult;
+import com.example.wmsspringbootproject.model.entity.SysRole;
+import com.example.wmsspringbootproject.model.entity.UserType;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
+import com.example.wmsspringbootproject.model.query.SysRoleQuery;
 import com.example.wmsspringbootproject.model.query.UserQuery;
-import com.example.wmsspringbootproject.model.vo.Result;
+import com.example.wmsspringbootproject.common.result.Result;
+import com.example.wmsspringbootproject.model.vo.UserTypeVO;
+import com.example.wmsspringbootproject.model.vo.UserVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,39 +34,54 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final AuthUserService authUserService;
+    private final SysRoleService sysRoleService;
     @Operation(summary = "获取用户列表")
     @GetMapping("/getInfo")
-    public List<Users> UserList(
+    public Result<IPage<UserVO>> UserList(
             @ParameterObject UserQuery userQuery
     ) {
         return userService.UserList(userQuery);
     }
     @Operation(summary = "新增用户")
     @PostMapping("/addUser")
-    public Result addUser(
+    public Result<Boolean> addUser(
             @Valid @RequestBody UserForm formData
     ) {
        return userService.addUser(formData);
     }
     @Operation(summary = "修改用户")
     @PutMapping("updateUser")
-    public Boolean updateUser(
+    public Result<Boolean> updateUser(
             @Valid @RequestBody UserForm formData
     ) {
         return userService.updateUser(formData);
     }
-    @Operation(summary = "删除用户")
-    @DeleteMapping("/deleteUser/{id}")
-    public Boolean deleteUser(
-            @Parameter(description ="请输入id") @PathVariable("id") Integer id
+    @Operation(summary = "重置密码")
+    @PutMapping("/resetPassword/{id}")
+    public Result<Boolean> resetPassWord(
+            @Parameter(description ="请输入id") @PathVariable("id") int id
     ) {
-        return userService.deleteUser(id);
+        return userService.resetPassword(id);
+    }
+    @Operation(summary = "删除用户")
+    @DeleteMapping("/deleteUser/{ids}")
+    public com.example.wmsspringbootproject.common.result.Result<Boolean> deleteUser(
+            @Parameter(description ="请输入id") @PathVariable("ids") String ids
+    ) {
+        return userService.deleteUser(ids);
     }
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public Result Login(
+    public Result<LoginResult> Login(
             @Valid @RequestBody UserForm formData
     ) {
         return authUserService.Login(formData);
+    }
+    @Operation(summary = "获取用户类型列表")
+    @GetMapping("/getTypeList")
+    public Result<IPage<UserTypeVO>> UserTypeList(
+            @ParameterObject SysRoleQuery query
+    ) {
+        return sysRoleService.getUserType(query);
     }
 }

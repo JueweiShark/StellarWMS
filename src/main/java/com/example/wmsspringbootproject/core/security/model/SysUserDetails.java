@@ -31,6 +31,8 @@ public class SysUserDetails implements UserDetails {
 
     private String warehouseId;
 
+    private String avatar;
+
     public SysUserDetails(Users authorInfo){
         this.id=authorInfo.getId();
         Set<String> roles=authorInfo.getRoles();
@@ -51,6 +53,7 @@ public class SysUserDetails implements UserDetails {
         this.dataScope=authorInfo.getDataScope();
         this.warehouseId=authorInfo.getWarehouseId();
         this.enabled= ObjectUtil.equal(authorInfo.getDeleted(),1);
+        this.avatar=authorInfo.getAvatar();
     }
 
     @Override

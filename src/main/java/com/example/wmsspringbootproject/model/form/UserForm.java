@@ -34,4 +34,10 @@ public class UserForm implements Serializable {
     private int deleted;
     @Schema(description ="邮箱登录：验证码")
     private String code;
+    @Schema(description ="角色")
+    private int typeId;
+    @Schema(description ="仓库id")
+    private int warehouseId;
+    @Schema(description ="状态")
+    private int status;
 }

@@ -82,6 +82,9 @@ springdoc:
     - group: adminGroup #分组名
       packages-to-scan: com.example.wmsspringbootproject.Controller # 生成文档所需的扫包路径，一般为启动类目录
       paths-to-match: '/**' #按路径匹配
+    - group: imGroup #分组名
+      packages-to-scan: com.example.wmsspringbootproject.im.http.controller # 生成文档所需的扫包路径，一般为启动类目录
+      paths-to-match: '/**' #按路径匹配
     - group: userGroup #分组名
       packages-to-scan: com.example.wmsspringbootproject.controller # 生成文档所需的扫包路径，一般为启动类目录
       paths-to-match: '/**' #按路径匹配
