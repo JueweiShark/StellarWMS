@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "03.产品管理")
+@Tag(name = "05.产品管理")
 @CrossOrigin
 
 @RequestMapping("/product")

@@ -88,6 +88,14 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
 }
 
     @Override
+    public Result<UserVO> UserDetails(int id) {
+        Users users=this.getById(id);
+        UserVO userVO = userConverter.entity2Vo(users);
+        userVO.setTypeId(sysUserTypeService.getUserTypeByUid(userVO.getId()).getRoleId());
+        return users ==null ? Result.failed("没有该用户") : Result.success(userVO);
+    }
+
+    @Override
     public Result<Boolean> addUser(UserForm userForm) {
         String name = userForm.getName();
         userForm.setName(name);

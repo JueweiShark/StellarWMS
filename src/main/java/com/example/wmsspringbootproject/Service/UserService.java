@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface UserService extends IService<Users> {
     Result<IPage<UserVO>> UserList(UserQuery userQuery);
+    Result<UserVO> UserDetails(int id);
     Result<Boolean> addUser(UserForm  userForm);
     Result<Boolean> updateUser(UserForm userForm);
     Result<Boolean> deleteUser(String ids);

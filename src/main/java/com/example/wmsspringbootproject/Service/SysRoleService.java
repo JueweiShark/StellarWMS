@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.entity.SysRole;
 import com.example.wmsspringbootproject.model.entity.UserType;
+import com.example.wmsspringbootproject.model.form.UserTypeForm;
+import com.example.wmsspringbootproject.model.form.WareHouseForm;
 import com.example.wmsspringbootproject.model.query.SysRoleQuery;
 import com.example.wmsspringbootproject.model.vo.UserTypeVO;
 
@@ -15,5 +17,10 @@ public interface SysRoleService {
     Integer getMaxDataScope(Set<String> roles);
     Result<IPage<UserTypeVO>> getUserType(SysRoleQuery query);
 
-    SysRole getSysRoleByRid(int id);
+    Result<UserTypeVO> getSysRoleByRid(int id);
+    Result<Boolean> saveSysRole(UserTypeForm form);
+
+    Result<Boolean> updateSysRole(UserTypeForm form);
+
+    Result<Boolean> removeSysRole(String ids);
 }

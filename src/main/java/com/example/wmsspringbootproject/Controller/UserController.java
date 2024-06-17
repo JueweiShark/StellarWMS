@@ -84,4 +84,11 @@ public class UserController {
     ) {
         return sysRoleService.getUserType(query);
     }
+    @GetMapping("/Details/{id}")
+    @Operation(summary = "获取用户详情")
+    public Result<UserVO> getRoleById(
+            @PathVariable("id") Integer id
+    ){
+        return userService.UserDetails(id);
+    }
 }

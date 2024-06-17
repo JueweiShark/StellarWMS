@@ -125,6 +125,6 @@ public class TextUtil {
         return str == null || str.length() == 0;
     }
     public static boolean isNotEmpty(Integer str){
-        return str!=null && str>=0;
+        return str!=null && str>=-1;
     }
 }
