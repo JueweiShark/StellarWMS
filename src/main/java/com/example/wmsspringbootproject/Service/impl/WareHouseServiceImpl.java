@@ -35,7 +35,6 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
     @Override
     @DataPermission(warehouseIdColumnName="id")
     public Result<IPage<WareHouseVO>> warehouseList(WarehouseQuery query) {
-        System.out.println("Status是:"+query.getStatus());
         LambdaQueryWrapper<Warehouses> queryWrapper=new LambdaQueryWrapper<>();
         Page<Warehouses> warehousesPage=new Page<>(query.getPageNum(),query.getPageSize());
         if (query != null) {
@@ -99,6 +98,7 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
 
 
     @Override
+    @LogNote(description = "删除仓库信息")
     public Result<Boolean> removeWareHouseInfo(String ids) {
         String[] idArray=ids.split(",");
         if(idArray.length>1){

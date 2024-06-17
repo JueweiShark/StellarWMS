@@ -65,27 +65,37 @@ public class LogNoteAspect {
             names.append(parameter.getName());
         }
         for (Object object : objects) {
-            Field[] fields=object.getClass().getDeclaredFields();
-            for (Field field : fields) {
-                field.setAccessible(true);
-                if(!String.valueOf(field.get(object)).isEmpty()){
-                    if(types.length()>2){
-                        types.append(", ");
+            if(object.getClass().getName().startsWith("com.example.wmsspringbootproject")){
+                Field[] fields=object.getClass().getDeclaredFields();
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    if(!String.valueOf(field.get(object)).isEmpty()){
+                        if(types.length()>2){
+                            types.append(", ");
+                        }
+                        if(String.valueOf(field.getType()).contains(".")){
+                            String type=String.valueOf(field.getType());
+                            types.append(type.substring(type.lastIndexOf(".")+1));
+                        }else{
+                            types.append(field.getType());
+                        }
+                        if(values.length()>2){
+                            values.append(", ");
+                        }
+                        values.append(field.getName());
+                        values.append(": ");
+                        values.append(field.get(object));
                     }
-                    if(String.valueOf(field.getType()).contains(".")){
-                        String type=String.valueOf(field.getType());
-                        types.append(type.substring(type.lastIndexOf(".")+1));
-                    }else{
-                        types.append(field.getType());
-                    }
-                    if(values.length()>2){
-                        values.append(", ");
-                    }
-                    values.append(field.getName());
-                    values.append(": ");
-                    values.append(field.get(object));
                 }
+            }else{
+                String type=object.getClass().getName();
+                types.append(type.substring(type.lastIndexOf(".")+1));
+                if(values.length()>2){
+                    values.append(", ");
+                }
+                values.append(object);
             }
+
         }
 
         names.append(" ]");
