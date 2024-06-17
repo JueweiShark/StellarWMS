@@ -26,4 +26,5 @@ public interface UserService extends IService<Users> {
      */
     Users getUserAuthInfo(String username);
     Users getRootUser();
+
 }

@@ -42,6 +42,7 @@ public class UserController {
     ) {
         return userService.UserList(userQuery);
     }
+
     @Operation(summary = "新增用户")
     @PostMapping("/addUser")
     public Result<Boolean> addUser(
@@ -90,5 +91,13 @@ public class UserController {
             @PathVariable("id") Integer id
     ){
         return userService.UserDetails(id);
+    }
+    @Operation(summary = "获取用户信息(token)")
+    @PostMapping("/getUserInfo")
+    public Result getUserInfo(
+            @RequestBody String token
+    ){
+        System.out.println("getUserInfo:"+token);
+        return authUserService.getUserInfo(token);
     }
 }

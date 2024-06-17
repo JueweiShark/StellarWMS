@@ -37,4 +37,6 @@ public class UserVO {
     private int status;
     @Schema(description ="仓库id")
     private int warehouseId;
+
+    private String role;
 }
