@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.wmsspringbootproject.Service.AuthUserService;
 import com.example.wmsspringbootproject.Service.SysRoleService;
 import com.example.wmsspringbootproject.Service.UserService;
+import com.example.wmsspringbootproject.model.dto.LoginResult;
 import com.example.wmsspringbootproject.model.entity.SysRole;
 import com.example.wmsspringbootproject.model.entity.UserType;
 import com.example.wmsspringbootproject.model.entity.Users;
@@ -71,7 +72,7 @@ public class UserController {
     }
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public com.example.wmsspringbootproject.model.vo.Result Login(
+    public Result<LoginResult> Login(
             @Valid @RequestBody UserForm formData
     ) {
         return authUserService.Login(formData);

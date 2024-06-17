@@ -1,6 +1,7 @@
 package com.example.wmsspringbootproject.Service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.entity.Users;
 import com.example.wmsspringbootproject.model.form.UserForm;
@@ -9,7 +10,7 @@ import com.example.wmsspringbootproject.model.vo.UserVO;
 
 import java.util.List;
 
-public interface UserService {
+public interface UserService extends IService<Users> {
     Result<IPage<UserVO>> UserList(UserQuery userQuery);
     Result<Boolean> addUser(UserForm  userForm);
     Result<Boolean> updateUser(UserForm userForm);
