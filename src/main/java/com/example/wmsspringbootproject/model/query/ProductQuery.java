@@ -15,4 +15,6 @@ public class ProductQuery extends BasePageQuery {
     private Integer warehouseId;
     @Schema(description="产品入库时间")
     private String createTime;
+    @Schema(description="是否已经删除")
+    private int deleted;
 }

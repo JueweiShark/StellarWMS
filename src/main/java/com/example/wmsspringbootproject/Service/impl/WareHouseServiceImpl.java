@@ -56,7 +56,11 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
             if (query.getStatus()!=-1) {
                 queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getStatus, query.getStatus()));
             }
-            queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getDeleted, 0));
+            if(TextUtil.isNotEmpty(query.getDeleted())) {
+                queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getDeleted, query.getDeleted()));
+            }else {
+                queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getDeleted, 1));
+            }
         }
         IPage<Warehouses> warehousesList =this.page(warehousesPage,queryWrapper);
         IPage<WareHouseVO> wareHouseVOIPage = new Page<>();
@@ -93,20 +97,20 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
         return Result.failed("仓库信息不存在");
     }
 
-    @LogNote(description = "删除仓库记录")
+
     @Override
     public Result<Boolean> removeWareHouseInfo(String ids) {
         String[] idArray=ids.split(",");
         if(idArray.length>1){
             for (String id : idArray) {
                 Warehouses warehouses=this.getById(id);
-                warehouses.setDeleted(1);
+                warehouses.setDeleted(2);
                 this.baseMapper.updateById(warehouses);
             }
             return Result.success();
         }else{
             Warehouses warehouses=this.getById(ids);
-            warehouses.setDeleted(1);
+            warehouses.setDeleted(2);
             Boolean result=this.baseMapper.updateById(warehouses)>0;
             return result ? Result.success(result) : Result.failed("删除仓库信息失败");
         }
