@@ -124,8 +124,4 @@ public class TextUtil {
     public static boolean isEmpty(CharSequence str) {
         return str == null || str.length() == 0;
     }
-//    验证int数据不为空
-    public static boolean isNotEmpty(Integer str){
-        return str!=null && str>=0;
-    }
 }
