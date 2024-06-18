@@ -70,9 +70,9 @@ public class ImWsMsgHandler implements IWsMsgHandler {
             return null;
         }
 
-        Users user = (Users) WmsCache.get(token);
-
+        SysUserDetails user = (SysUserDetails) WmsCache.get(token);
         if (user == null) {
+            System.out.println("用户为空");
             return null;
         }
 

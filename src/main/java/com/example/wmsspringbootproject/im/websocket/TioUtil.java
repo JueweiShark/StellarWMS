@@ -15,10 +15,12 @@ public class TioUtil {
     private static TioWebsocketStarter tioWebsocketStarter;
 
     public static void buildTio() {
+        System.out.println(tioWebsocketStarter);
         TioWebsocketStarter websocketStarter = null;
         try {
             websocketStarter = SpringUtil.getBean(TioWebsocketStarter.class);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
         TioUtil.tioWebsocketStarter = websocketStarter;
     }

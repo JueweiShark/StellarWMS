@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInt
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.example.wmsspringbootproject.common.Annotation.DataPermission;
 import com.example.wmsspringbootproject.common.handle.MyDataPermissionHandler;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@MapperScan({"com.example.wmsspringbootproject.mapper","com.example.wmsspringbootproject.im.http.dao"})
 public class MyBatisPlusConfig {
 
     /**
