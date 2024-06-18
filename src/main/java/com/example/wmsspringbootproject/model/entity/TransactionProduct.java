@@ -9,6 +9,8 @@ import lombok.Data;
 public class TransactionProduct {
     private Long id;
     private String name;
+    private int typeId;
+    private String picture;
     private int number;
     private String util;
     @TableField("transaction_id")

@@ -42,13 +42,13 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     @Override
     public Result<IPage<TransactionVO>> transactionList(TransactionsQuery query) {
         LambdaQueryWrapper<Transactions> queryWrapper=new LambdaQueryWrapper<>();
-        if (TextUtil.isNotEmpty((int) query.getCreatorId())) {
+        if (query.getCreatorId()>0) {
             queryWrapper.eq(Transactions::getCreatorId, query.getCreatorId());
         }
-        if (TextUtil.isNotEmpty((int) query.getConfirmatorId())) {
+        if (query.getConfirmatorId()>0) {
             queryWrapper.eq(Transactions::getConfirmatorId, query.getConfirmatorId());
         }
-        if (TextUtil.isNotEmpty((int) query.getAuditorId())){
+        if (query.getAuditorId()>0){
             queryWrapper.eq(Transactions::getAuditorId, query.getAuditorId());
         }
         Page<Transactions> transactionPage=new Page<>(query.getPageNum(),query.getPageSize());

@@ -13,6 +13,10 @@ public class TransactionProductVO {
     private String id;
     @Schema(description = "事务产品名称")
     private String name;
+    @Schema(description = "事务产品图片")
+    private String picture;
+    @Schema(description = "事务产品类型")
+    private int typeId;
     @Schema(description = "事务产品数量")
     private int number;
     @Schema(description = "事务单位ID")
