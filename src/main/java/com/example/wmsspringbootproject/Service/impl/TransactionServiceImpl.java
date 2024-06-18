@@ -22,6 +22,7 @@ import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.vo.TransactionVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.util.TxUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +42,15 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     @Override
     public Result<IPage<TransactionVO>> transactionList(TransactionsQuery query) {
         LambdaQueryWrapper<Transactions> queryWrapper=new LambdaQueryWrapper<>();
+        if (TextUtil.isNotEmpty((int) query.getCreatorId())) {
+            queryWrapper.eq(Transactions::getCreatorId, query.getCreatorId());
+        }
+        if (TextUtil.isNotEmpty((int) query.getConfirmatorId())) {
+            queryWrapper.eq(Transactions::getConfirmatorId, query.getConfirmatorId());
+        }
+        if (TextUtil.isNotEmpty((int) query.getAuditorId())){
+            queryWrapper.eq(Transactions::getAuditorId, query.getAuditorId());
+        }
         Page<Transactions> transactionPage=new Page<>(query.getPageNum(),query.getPageSize());
         IPage<Transactions> transactionList =this.page(transactionPage,queryWrapper);
         IPage<TransactionVO> transactionVOIPage = new Page<>();
@@ -63,6 +73,9 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         transaction.setCreateTime(createTime);
         transaction.setUpdateTime(createTime);
         transaction.setStatus(transaction.getStatus()==0?1:transaction.getStatus()==1?2:3);
+        if (TextUtil.isNotEmpty((int) form.getCreatorId())){
+            transaction.setCreatorId(form.getCreatorId());
+        }
 
         if (!this.save(transaction)){
             return Result.failed("保存失败");
