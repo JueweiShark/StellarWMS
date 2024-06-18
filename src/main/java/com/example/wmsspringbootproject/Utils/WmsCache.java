@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 public class WmsCache {
 
@@ -80,7 +81,7 @@ public class WmsCache {
      * @return
      */
     public static Collection values() {
-        return map.values();
+        return map.values().stream().map(Entity::getValue).collect(Collectors.toList());
     }
 
     /**
