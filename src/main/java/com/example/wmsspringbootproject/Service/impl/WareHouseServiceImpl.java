@@ -33,7 +33,6 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
 
     @LogNote(description = "获取仓库列表")
     @Override
-    @DataPermission(warehouseIdColumnName="id")
     public Result<IPage<WareHouseVO>> warehouseList(WarehouseQuery query) {
         LambdaQueryWrapper<Warehouses> queryWrapper=new LambdaQueryWrapper<>();
         Page<Warehouses> warehousesPage=new Page<>(query.getPageNum(),query.getPageSize());

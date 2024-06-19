@@ -18,9 +18,10 @@ public class TransactionsQuery extends BasePageQuery {
     private String updateTime;
     private String startTime;
     private String endTime;
-    private int status;
+    private String status;
     private List<TransactionProduct> productList;
     private Long warehouseId;
     private int progress;
+    private int deleted;
 
 }

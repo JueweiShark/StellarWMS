@@ -65,8 +65,9 @@ public class TransactionController {
     @GetMapping("/Details/{id}")
     @Operation(summary = "获取事务详情")
     public Result<TransactionVO> getTransactions(
-            @PathVariable("id") Long id
+            @PathVariable("id") String id
     ){
+        System.out.println("查询事务详情"+id);
         return transactionService.getTransactionDetails(id);
     }
     @GetMapping("/productList/{id}")
@@ -74,6 +75,7 @@ public class TransactionController {
     public Result<List<TransactionProductVO>> listTransactionProduct(
             @PathVariable("id") Long id
     ){
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         return transactionProductService.getTransactionProductByTid(id);
     }
 }

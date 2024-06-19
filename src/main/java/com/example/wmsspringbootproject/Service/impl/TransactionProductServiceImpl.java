@@ -40,7 +40,7 @@ public class TransactionProductServiceImpl extends ServiceImpl<TransactionProduc
                     vo.setNumber(transactionProduct.getNumber());
                     vo.setUtil(transactionProduct.getUtil());
                     vo.setPicture(transactionProduct.getPicture());
-                    vo.setTypeId(transactionProduct.getTypeId());
+                    vo.setTypeId(Integer.parseInt(transactionProduct.getTypeId()));
                     vo.setTransactionId(String.valueOf(transactionProduct.getTransactionId()));
                     return vo;
                 }).collect(Collectors.toList()));

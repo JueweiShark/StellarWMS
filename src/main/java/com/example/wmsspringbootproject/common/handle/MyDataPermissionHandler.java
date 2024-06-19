@@ -38,10 +38,10 @@ public class MyDataPermissionHandler implements DataPermissionHandler {
 
         Class<?> clazz = Class.forName(mappedStatementId.substring(0, mappedStatementId.lastIndexOf(StringPool.DOT)));
         String methodName = mappedStatementId.substring(mappedStatementId.lastIndexOf(StringPool.DOT) + 1);
-        Method[] methods = clazz.getDeclaredMethods();
-        if(methods.length==0){
-            methods=DataPermissionAspect.getMethods().toArray(new Method[0]);
-        }
+        Method[] methods =DataPermissionAspect.getMethods().toArray(new Method[0]);
+//        if(methods.length==0){
+//            methods=DataPermissionAspect.getMethods().toArray(new Method[0]);
+//        }
         for (Method method : methods) {
             DataPermission annotation = method.getAnnotation(DataPermission.class);
             // 如果没有注解或者是超级管理员，直接返回

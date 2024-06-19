@@ -14,5 +14,5 @@ public interface TransactionService {
 
     Result<Boolean> removeTransaction(String ids);
 
-    Result<TransactionVO> getTransactionDetails(Long id);
+    Result<TransactionVO> getTransactionDetails(String id);
 }

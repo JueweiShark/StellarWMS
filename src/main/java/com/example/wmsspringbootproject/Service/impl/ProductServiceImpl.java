@@ -50,7 +50,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Products> imp
                 queryWrapper.and(wrapper -> wrapper.like(Products::getTypeId, query.getTypeId()));
             }
             if (query.getWarehouseId()!=0) {
-                queryWrapper.and(wrapper -> wrapper.like(Products::getWarehouseId, query.getWarehouseId()));
+                queryWrapper.and(wrapper -> wrapper.eq(Products::getWarehouseId, query.getWarehouseId()));
             }
             if (!TextUtil.textIsEmpty(query.getCreateTime())) {
                 queryWrapper.and(wrapper -> wrapper.like(Products::getCreateTime, query.getCreateTime()));

@@ -41,6 +41,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     @Override
     public Result<IPage<TransactionVO>> transactionList(TransactionsQuery query) {
+        System.out.println(query);
         LambdaQueryWrapper<Transactions> queryWrapper=new LambdaQueryWrapper<>();
         if (query.getCreatorId()>0) {
             queryWrapper.eq(Transactions::getCreatorId, query.getCreatorId());
@@ -50,6 +51,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         }
         if (query.getAuditorId()>0){
             queryWrapper.eq(Transactions::getAuditorId, query.getAuditorId());
+        }
+        if(query.getWarehouseId()>0){
+            queryWrapper.eq(Transactions::getWarehouseId, query.getWarehouseId());
+        }
+        if (TextUtil.isNotEmpty(query.getDeleted())){
+            queryWrapper.eq(Transactions::getDeleted,query.getDeleted());
         }
         Page<Transactions> transactionPage=new Page<>(query.getPageNum(),query.getPageSize());
         IPage<Transactions> transactionList =this.page(transactionPage,queryWrapper);
@@ -67,12 +74,14 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     @Override
     public Result<Boolean> saveTransaction(TransactionsForm form) {
+        System.out.println(form);
         Transactions transaction = transactionConverter.form2entity(form);
         System.out.println(transaction);
         String createTime = TextUtil.formatDate(new Date());
         transaction.setCreateTime(createTime);
         transaction.setUpdateTime(createTime);
         transaction.setStatus(transaction.getStatus()==0?1:transaction.getStatus()==1?2:3);
+        transaction.setDeleted(1);
         if (TextUtil.isNotEmpty((int) form.getCreatorId())){
             transaction.setCreatorId(form.getCreatorId());
         }
@@ -85,6 +94,13 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         for(TransactionProduct product : form.getProductList()){
             System.out.println(product);
             product.setTransactionId(transaction.getId());
+            System.out.println("*****************************"+product.getTypeId());
+            if (!TextUtil.isNumeric(product.getTypeId())){
+                ProductTypes productTypes = new ProductTypes();
+                productTypes.setName(product.getTypeId());
+                productTypeMapper.insert(productTypes);
+                product.setTypeId(String.valueOf(productTypes.getId()));
+            }
             Long productId = productService.saveTransactionProduct(product);
             if(productId==null){
                 return Result.failed("保存失败");
@@ -105,7 +121,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             Transactions target = transactionConverter.form2entity(form);
             target.setUpdateTime(TextUtil.formatDate(new Date()));
             target.setStatus(transaction.getStatus() == 0 ? 1 : transaction.getStatus() == 1 ? 2 : 3);
-
+//            target.setStatus(Integer.parseInt(form.getStatus()));
             if (!this.updateById(target)) {
                 return Result.failed("保存失败");
             }
@@ -135,6 +151,15 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                     return Result.failed("保存失败");
                 }
             }
+//            if (form.getAuditorId() >0) {
+////                遍历form中的productList
+//                for (TransactionProduct product : form.getProductList()) {
+//                    ProductTypes productTypes = productTypeMapper.selectById(product.getTypeId());
+//                    if (productTypes==null) {
+//                        pro
+//                    }
+//                }
+//            }
             return Result.success(true);
         } else {
             return Result.failed("保存失败");
@@ -160,9 +185,13 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     }
 
     @Override
-    public Result<TransactionVO> getTransactionDetails(Long id) {
+    public Result<TransactionVO> getTransactionDetails(String id) {
         Transactions transactions =this.getById(id);
-        return transactions ==null ? Result.failed("未查询到该产品") : Result.success(transactionConverter.entity2Vo(transactions));
+        System.out.println(transactions);
+        if (transactions == null) {
+            return Result.failed("未查询到该产品");
+        }
+        return Result.success(transactionConverter.entity2Vo(transactions));
     }
 
 
