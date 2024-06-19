@@ -54,12 +54,12 @@ public class MessageCache {
             readWriteLock.readLock().unlock();
         }
 
-        try {
-            // FIXME 新增发送消息的方法
-            emailSender.send();
-        } catch (Exception e) {
-            log.error("发送IM邮件失败：", e);
-        }
+//        try {
+//            // FIXME 新增发送消息的方法
+//            emailSender.send();
+//        } catch (Exception e) {
+//            log.error("发送IM邮件失败：", e);
+//        }
     }
 
     public void putGroupMessage(ImChatUserGroupMessage message) {
