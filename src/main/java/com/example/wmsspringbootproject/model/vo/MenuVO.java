@@ -47,5 +47,9 @@ public class MenuVO {
     @Schema(description = "子菜单")
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     private List<MenuVO> children;
+    @Schema(description = "创建时间")
+    private String createTime;
+    @Schema(description = "修改时间")
+    private String updateTime;
 
 }

@@ -117,7 +117,11 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
         entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         entity.setDeleted(1);
         boolean result = this.save(entity);
+        if (TextUtil.isNotEmpty(userForm.getTypeId())){
+            sysUserTypeService.addUserType(entity.getId(),4);
+        }else{
         sysUserTypeService.addUserType(entity.getId(),userForm.getTypeId());
+        }
         return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
     }
 

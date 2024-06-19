@@ -46,7 +46,7 @@ public class UserController {
     @Operation(summary = "新增用户")
     @PostMapping("/addUser")
     public Result<Boolean> addUser(
-            @Valid @RequestBody UserForm formData
+             @RequestBody UserForm formData
     ) {
        return userService.addUser(formData);
     }

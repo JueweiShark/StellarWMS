@@ -20,8 +20,10 @@ import com.example.wmsspringbootproject.model.query.TransactionsQuery;
 import com.example.wmsspringbootproject.model.vo.ProductVO;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.vo.TransactionVO;
+import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.util.TxUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +42,34 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     @Override
     public Result<IPage<TransactionVO>> transactionList(TransactionsQuery query) {
+        System.out.println(query);
         LambdaQueryWrapper<Transactions> queryWrapper=new LambdaQueryWrapper<>();
+        if (query.getCreatorId()>0) {
+            queryWrapper.eq(Transactions::getCreatorId, query.getCreatorId());
+        }
+        if (query.getConfirmatorId()>0) {
+            queryWrapper.eq(Transactions::getConfirmatorId, query.getConfirmatorId());
+        }
+        if (query.getAuditorId()>0){
+            queryWrapper.eq(Transactions::getAuditorId, query.getAuditorId());
+        }
+        if(query.getWarehouseId()>0){
+            queryWrapper.eq(Transactions::getWarehouseId, query.getWarehouseId());
+        }
+        if (Integer.valueOf(query.getStatus()) > -1){
+            if (Integer.valueOf(query.getStatus())==-1)
+                queryWrapper.gt(Transactions::getStatus, Integer.valueOf(query.getStatus()));
+            if (Integer.valueOf(query.getStatus())==1)
+                queryWrapper.eq(Transactions::getStatus, Integer.valueOf(query.getStatus()));
+            if (Integer.valueOf(query.getStatus())==2)
+                queryWrapper.eq(Transactions::getStatus, Integer.valueOf(query.getStatus()));
+        }else {
+            queryWrapper.eq(Transactions::getStatus,Integer.valueOf(query.getStatus()));
+        }
+
+        if (TextUtil.isNotEmpty(query.getDeleted())){
+            queryWrapper.eq(Transactions::getDeleted,query.getDeleted());
+        }
         Page<Transactions> transactionPage=new Page<>(query.getPageNum(),query.getPageSize());
         IPage<Transactions> transactionList =this.page(transactionPage,queryWrapper);
         IPage<TransactionVO> transactionVOIPage = new Page<>();
@@ -57,12 +86,17 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
 
     @Override
     public Result<Boolean> saveTransaction(TransactionsForm form) {
+        System.out.println(form);
         Transactions transaction = transactionConverter.form2entity(form);
         System.out.println(transaction);
         String createTime = TextUtil.formatDate(new Date());
         transaction.setCreateTime(createTime);
         transaction.setUpdateTime(createTime);
         transaction.setStatus(transaction.getStatus()==0?1:transaction.getStatus()==1?2:3);
+        transaction.setDeleted(1);
+        if (TextUtil.isNotEmpty((int) form.getCreatorId())){
+            transaction.setCreatorId(form.getCreatorId());
+        }
 
         if (!this.save(transaction)){
             return Result.failed("保存失败");
@@ -72,6 +106,13 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         for(TransactionProduct product : form.getProductList()){
             System.out.println(product);
             product.setTransactionId(transaction.getId());
+            System.out.println("*****************************"+product.getTypeId());
+            if (!TextUtil.isNumeric(product.getTypeId())){
+                ProductTypes productTypes = new ProductTypes();
+                productTypes.setName(product.getTypeId());
+                productTypeMapper.insert(productTypes);
+                product.setTypeId(String.valueOf(productTypes.getId()));
+            }
             Long productId = productService.saveTransactionProduct(product);
             if(productId==null){
                 return Result.failed("保存失败");
@@ -91,8 +132,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         if (transaction != null) {
             Transactions target = transactionConverter.form2entity(form);
             target.setUpdateTime(TextUtil.formatDate(new Date()));
-            target.setStatus(transaction.getStatus() == 0 ? 1 : transaction.getStatus() == 1 ? 2 : 3);
-
+            if (Integer.valueOf(form.getStatus())==-1){
+                target.setStatus(-1);
+            }else {
+                target.setStatus(transaction.getStatus() == 1 ? 2 : transaction.getStatus() == 2 ? 3 : 1);
+            }
+//            target.setStatus(Integer.parseInt(form.getStatus()));
             if (!this.updateById(target)) {
                 return Result.failed("保存失败");
             }
@@ -122,6 +167,15 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                     return Result.failed("保存失败");
                 }
             }
+//            if (form.getAuditorId() >0) {
+////                遍历form中的productList
+//                for (TransactionProduct product : form.getProductList()) {
+//                    ProductTypes productTypes = productTypeMapper.selectById(product.getTypeId());
+//                    if (productTypes==null) {
+//                        pro
+//                    }
+//                }
+//            }
             return Result.success(true);
         } else {
             return Result.failed("保存失败");
@@ -147,9 +201,13 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     }
 
     @Override
-    public Result<TransactionVO> getTransactionDetails(Long id) {
+    public Result<TransactionVO> getTransactionDetails(String id) {
         Transactions transactions =this.getById(id);
-        return transactions ==null ? Result.failed("未查询到该产品") : Result.success(transactionConverter.entity2Vo(transactions));
+        System.out.println(transactions);
+        if (transactions == null) {
+            return Result.failed("未查询到该产品");
+        }
+        return Result.success(transactionConverter.entity2Vo(transactions));
     }
 
 

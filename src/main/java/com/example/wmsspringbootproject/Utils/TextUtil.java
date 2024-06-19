@@ -127,4 +127,17 @@ public class TextUtil {
     public static boolean isNotEmpty(Integer str){
         return str!=null && str>=-1;
     }
+    //判断sting类型字符串内容是否是数字
+    public static boolean isNumeric(String str){
+        if(str==null){
+            return false;
+        }
+        int sz = str.length();
+        for (int i = 0; i < sz; i++) {
+            if (Character.isDigit(str.charAt(i)) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 @RequestMapping("/menus")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin
 public class SysMenuController {
 
     private final SysMenuService menuService;
@@ -66,7 +67,7 @@ public class SysMenuController {
     }
 
     @Operation(summary = "修改菜单")
-    @PutMapping(value = "/modify/{id}")
+    @PutMapping(value = "/modify")
     @PreAuthorize("@bt.hasPerm('sys:menu:edit')")
     public Result updateMenu(
             @RequestBody MenuForm menuForm
