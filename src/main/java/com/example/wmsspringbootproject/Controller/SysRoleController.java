@@ -2,10 +2,13 @@ package com.example.wmsspringbootproject.Controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.wmsspringbootproject.Service.AuthUserService;
+import com.example.wmsspringbootproject.Service.SysRoleMenuService;
 import com.example.wmsspringbootproject.Service.SysRoleService;
 import com.example.wmsspringbootproject.Service.UserService;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.dto.LoginResult;
+import com.example.wmsspringbootproject.model.entity.SysRoleMenu;
+import com.example.wmsspringbootproject.model.form.RoleMenuForm;
 import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.form.UserTypeForm;
 import com.example.wmsspringbootproject.model.form.WareHouseForm;
@@ -25,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "07.角色管理")
 @RestController
 @RequiredArgsConstructor
@@ -34,6 +39,8 @@ import org.springframework.web.bind.annotation.*;
 public class SysRoleController {
     @Autowired
     private SysRoleService sysRoleService;
+    @Autowired
+    private SysRoleMenuService sysRoleMenuService;
     @Operation(summary = "获取用户类型列表")
     @GetMapping("/getTypeList")
     public Result<IPage<UserTypeVO>> UserTypeList(
@@ -70,5 +77,19 @@ public class SysRoleController {
             @RequestBody UserTypeForm userTypeForm
             ){
         return sysRoleService.updateSysRole(userTypeForm);
+    }
+    @PostMapping("/assignPermissions")
+    @Operation(summary = "分配权限")
+    public Result<Boolean> addUserType(
+            @RequestBody RoleMenuForm roleMenuForm
+            ){
+        return sysRoleMenuService.updateRoleMenu(roleMenuForm);
+    }
+    @GetMapping("/getPermission/{roleId}")
+    @Operation(summary = "获取角色权限")
+    public Result<List<SysRoleMenu>> listByRoleId(
+            @PathVariable("roleId") Long roleId
+    ){
+        return sysRoleMenuService.listByRoleId(roleId);
     }
 }
