@@ -21,7 +21,7 @@ public @interface DataPermission {
 
     String userAlias() default "";
 
-    String userIdColumnName() default "create_by";
+    String userIdColumnName() default "id";
 
 }
 
