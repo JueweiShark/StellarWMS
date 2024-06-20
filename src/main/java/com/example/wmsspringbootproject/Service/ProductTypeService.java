@@ -12,6 +12,4 @@ import java.util.List;
 public interface ProductTypeService {
 
    Result<List<ProductTypeVO>> productTypeList();
-
-
 }
