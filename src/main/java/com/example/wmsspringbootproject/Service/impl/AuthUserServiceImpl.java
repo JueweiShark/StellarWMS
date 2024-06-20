@@ -61,7 +61,8 @@ public class AuthUserServiceImpl implements AuthUserService {
             String accessToken = jwtTokenUtil.createToken(authentication);
             WmsCache.put(accessToken,jwtTokenUtil.getUser(accessToken),Constants.TOKEN_EXPIRE);
             WmsCache.put(Convert.toStr(userDetails.getId()),accessToken,Constants.TOKEN_EXPIRE);
-            List<String> results=WmsCache.values().stream().toList();
+            List<Object> results=WmsCache.values().stream().toList();
+            SysUserDetails userDetails1=(SysUserDetails) WmsCache.get(accessToken);
             return Result.success(LoginResult.builder()
                     .tokenType("wms")
                     .accessToken(accessToken)

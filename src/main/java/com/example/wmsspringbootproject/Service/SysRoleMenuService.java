@@ -2,8 +2,10 @@ package com.example.wmsspringbootproject.Service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.bo.RolePermsBO;
 import com.example.wmsspringbootproject.model.entity.SysRoleMenu;
+import com.example.wmsspringbootproject.model.form.RoleMenuForm;
 
 
 import java.util.List;
@@ -23,6 +25,8 @@ public interface SysRoleMenuService extends IService<SysRoleMenu> {
      * @return 菜单ID集合
      */
     List<Long> listMenuIdsByRoleId(Long roleId);
+    Result<List<SysRoleMenu>> listByRoleId(Long roleId);
+    Result<Boolean> updateRoleMenu(RoleMenuForm roleMenuForm);
 
 
     /**

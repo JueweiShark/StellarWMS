@@ -36,7 +36,7 @@ public class UserController {
     private final AuthUserService authUserService;
     private final SysRoleService sysRoleService;
     @Operation(summary = "获取用户列表")
-    @GetMapping("/getInfo")
+    @GetMapping("/getInfoList")
     public Result<IPage<UserVO>> UserList(
             @ParameterObject UserQuery userQuery
     ) {

@@ -80,7 +80,7 @@ public class WmsCache {
      *
      * @return
      */
-    public static Collection values() {
+    public static Collection<Object> values() {
         return map.values().stream().map(Entity::getValue).collect(Collectors.toList());
     }
 
