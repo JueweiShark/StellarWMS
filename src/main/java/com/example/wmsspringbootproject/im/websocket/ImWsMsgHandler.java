@@ -66,11 +66,17 @@ public class ImWsMsgHandler implements IWsMsgHandler {
     public HttpResponse handshake(HttpRequest httpRequest, HttpResponse httpResponse, ChannelContext channelContext) {
         String token = httpRequest.getParam(Constants.TOKEN_HEADER);
 
+        log.info("token:"+token);
         if (!StringUtils.hasText(token)) {
             return null;
         }
 
         SysUserDetails user = (SysUserDetails) WmsCache.get(token);
+        List<String> results=WmsCache.getMap().keySet().stream().toList();
+        for (String result : results) {
+            System.out.println(result);
+        }
+        System.out.println(user);
         if (user == null) {
             System.out.println("用户为空");
             return null;
@@ -148,6 +154,8 @@ public class ImWsMsgHandler implements IWsMsgHandler {
 
     @Override
     public Object onText(WsRequest wsRequest, String text, ChannelContext channelContext) {
+        System.out.println("--------------------------------------------------------------------------------------------------------------");
+        log.info("消息为；"+text);
         //消息为空则直接返回null
         if (!StringUtils.hasText(text)) {
             return null;
@@ -183,7 +191,7 @@ public class ImWsMsgHandler implements IWsMsgHandler {
                 //将消息存入缓存中
                 messageCache.putUserMessage(userMessage);
                 //将消息发送给 发送方
-                Tio.sendToUser(channelContext.tioConfig, imMessage.getFromId().toString(), wsResponse);
+//                Tio.sendToUser(channelContext.tioConfig, imMessage.getFromId().toString(), wsResponse);
             } else if (imMessage.getMessageType().intValue() == ImEnum.MESSAGE_TYPE_MSG_GROUP.getCode()) {
                 //群聊
                 ImChatUserGroupMessage groupMessage = new ImChatUserGroupMessage();
