@@ -75,4 +75,10 @@ public class ProductController {
         return productTypeService.productTypeList();
     }
 
+
+    @GetMapping("/type")
+    @Operation(summary = "获取产")
+    public Result<List<ProductTypeVO>> getProductType(){
+        return productTypeService.productTypeSum();
+    }
 }
