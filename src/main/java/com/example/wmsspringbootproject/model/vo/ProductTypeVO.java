@@ -14,6 +14,4 @@ public class ProductTypeVO {
     @Schema(description ="产品名称")
     private String name;
 
-    private int count;
-
 }
