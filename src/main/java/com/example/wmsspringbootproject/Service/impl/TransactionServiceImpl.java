@@ -59,6 +59,10 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         if(query.getWarehouseId()>0){
             queryWrapper.eq(Transactions::getWarehouseId, query.getWarehouseId());
         }
+        if(query.getStartTime()!=null && query.getEndTime()!=null){
+            queryWrapper.ge(Transactions::getUpdateTime, query.getStartTime());
+            queryWrapper.le(Transactions::getUpdateTime, query.getEndTime());
+        }
         if (Integer.valueOf(query.getStatus()) > -1){
             if (Integer.valueOf(query.getStatus())==-1)
                 queryWrapper.gt(Transactions::getStatus, Integer.valueOf(query.getStatus()));
