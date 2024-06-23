@@ -14,6 +14,7 @@ import org.tio.core.Tio;
 import org.tio.websocket.common.WsResponse;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * @apiNote 推送系统通知消息
@@ -53,7 +54,7 @@ public class SysPushMessage {
         imMessage.setAvatar("");
         imMessage.setContent(imChatUserMessage.getContent());
         imMessage.setFromId(ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID);
-        imMessage.setToId(imMessage.getToId());
+        imMessage.setToId(Convert.toInt(imChatUserMessage.getToId()));
         imMessage.setMessageType(ImEnum.MESSAGE_TYPE_MSG_GROUP.getCode());
 
         TioWebsocketStarter tioWebsocketStarter= TioUtil.getTio();
@@ -94,7 +95,8 @@ public class SysPushMessage {
         imChatUserMessage.setFromId(ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID);
         imChatUserMessage.setToId(Convert.toStr(userId));
         imChatUserMessage.setCreateTime(LocalDateTime.now());
-        if(WmsCache.getTwainMap().get(Convert.toInt(userId)).equals(ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID)){
+        String str=WmsCache.getTwainMap().get(userId);
+        if(!TextUtil.textIsEmpty(str) && str.replace("solo_","").equals(userId.toString())){
             imChatUserMessage.setMessageStatus(ImConfigConst.USER_MESSAGE_STATUS_TRUE);
         }else{
             imChatUserMessage.setMessageStatus(ImConfigConst.USER_MESSAGE_STATUS_FALSE);

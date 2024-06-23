@@ -5,11 +5,11 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.wmsspringbootproject.Service.UserService;
-import com.example.wmsspringbootproject.Utils.RedisUtil;
-import com.example.wmsspringbootproject.Utils.SecurityUtils;
-import com.example.wmsspringbootproject.Utils.SysPushMessage;
+import com.example.wmsspringbootproject.Utils.*;
 import com.example.wmsspringbootproject.common.Annotation.LogNote;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.core.security.model.SysUserDetails;
@@ -17,6 +17,7 @@ import com.example.wmsspringbootproject.im.http.entity.ImChatGroup;
 import com.example.wmsspringbootproject.im.http.entity.ImChatGroupUser;
 import com.example.wmsspringbootproject.im.http.entity.ImChatUserGroupMessage;
 import com.example.wmsspringbootproject.im.http.entity.ImChatUserMessage;
+import com.example.wmsspringbootproject.im.http.query.ImChatGroupQuery;
 import com.example.wmsspringbootproject.im.http.service.ImChatGroupService;
 import com.example.wmsspringbootproject.im.http.service.ImChatGroupUserService;
 import com.example.wmsspringbootproject.im.http.service.ImChatUserGroupMessageService;
@@ -35,7 +36,9 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.tio.core.ChannelContext;
 import org.tio.core.Tio;
+import org.tio.utils.lock.SetWithLock;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -71,6 +74,9 @@ public class ImChatGroupController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    CommonQuery commonQuery;
+
     @GetMapping("/list")
     @Operation(summary = "获取群列表")
     @LogNote(description="获取群列表")
@@ -83,7 +89,7 @@ public class ImChatGroupController {
         lambdaQuery.in(ImChatGroupUser::getUserStatus, ImConfigConst.GROUP_USER_STATUS_PASS,ImConfigConst.GROUP_USER_STATUS_SILENCE);
         List<ImChatGroupUser> groupUsers=imChatGroupUserService.list(lambdaQuery);
 
-        Map<Integer,ImChatGroupUser> groupUserMap=groupUsers.stream().collect(Collectors.toMap(ImChatGroupUser::getGroupId, Function.identity()));
+        Map<Integer,List<ImChatGroupUser>> groupUserMap=groupUsers.stream().collect(Collectors.groupingBy(ImChatGroupUser::getGroupId));
 
         LambdaQueryWrapper<ImChatGroup> wrapper=new LambdaQueryWrapper<>();
         wrapper.eq(ImChatGroup::getGroupType,ImConfigConst.GROUP_TOPIC);
@@ -92,19 +98,57 @@ public class ImChatGroupController {
                     .eq(ImChatGroup::getGroupType,ImConfigConst.GROUP_COMMON);
         }
         List<ImChatGroup> groups=imChatGroupService.list(wrapper);
-
-        List<GroupVO> groupVOS=groups.stream().map(group->{
-            ImChatGroupUser imChatGroupUser=groupUserMap.get(group.getId());
-            ImChatGroupUser groupUser=new ImChatGroupUser();
-            if(imChatGroupUser!=null){
-                groupUser.setUserStatus(imChatGroupUser.getUserStatus());
-                groupUser.setCreateTime(LocalDateTime.now());
-                groupUser.setUserId(Integer.parseInt(String.valueOf(userId)));
-                groupUser.setAdminFlag(imChatGroupUser.getAdminFlag());
+if(groups!=null){
+    List<GroupVO> groupVOS=groups.stream().map(group->{
+        List<ImChatGroupUser> imChatGroupUsers=groupUserMap.get(group.getId());
+        ImChatGroupUser imChatGroupUser=null;
+        for (ImChatGroupUser GroupUser : imChatGroupUsers) {
+            if(Objects.equals(GroupUser.getUserId(), Convert.toInt(userId))){
+                imChatGroupUser=GroupUser;
             }
-            return getGroupVO(group,groupUser);
-        }).toList();
-        return Result.success(groupVOS);
+        }
+        return getGroupVO(group,imChatGroupUser);
+    }).toList();
+    return Result.success(groupVOS);
+}
+return Result.result("200","没有数据",new ArrayList<>());
+    }
+
+    //TODO 获取群搜索列表
+    @GetMapping("/query")
+    @LogNote(description="获取群搜索列表")
+    @Operation(summary="获取群搜索列表")
+    public Result<Page<ImChatGroup>> query(@ParameterObject ImChatGroupQuery imChatGroupQuery){
+        LambdaQueryChainWrapper<ImChatGroup> query=imChatGroupService.lambdaQuery();
+        if(!TextUtil.textIsEmpty(imChatGroupQuery.getKeyWords())){
+            query.like(ImChatGroup::getGroupName,imChatGroupQuery.getKeyWords())
+                    .or(sel->sel.like(ImChatGroup::getNotice,imChatGroupQuery.getKeyWords()))
+                    .or(sel->sel.like(ImChatGroup::getIntroduction,imChatGroupQuery.getKeyWords()));
+        }
+        Page<ImChatGroup> imChatGroupPage=new Page<>(imChatGroupQuery.getPageNum(),imChatGroupQuery.getPageSize());
+        query.page(imChatGroupPage);
+        return Result.success(imChatGroupPage);
+    }
+    //TODO 获取群详细信息
+    @GetMapping("/detail")
+    @LogNote(description="获取群详细信息")
+    @Operation(summary="获取群详细信息")
+    public Result<GroupVO> detail(@RequestParam("groupId") String groupId){
+        LambdaQueryWrapper<ImChatGroupUser> lambdaQuery=new LambdaQueryWrapper<>();
+        lambdaQuery.eq(ImChatGroupUser::getGroupId,groupId);
+        lambdaQuery.eq(ImChatGroupUser::getUserId,SecurityUtils.getUserId());
+        ImChatGroupUser imChatGroupUser=imChatGroupUserService.getOne(lambdaQuery);
+        GroupVO groupVO=null;
+        ImChatGroup imChatGroup=imChatGroupService.getById(groupId);
+        if(imChatGroup==null){
+            return Result.failed("该群不存在");
+        }
+        if(imChatGroupUser!=null){
+            groupVO=getGroupVO(imChatGroup,imChatGroupUser);
+        }else{
+            groupVO=getGroupVO(imChatGroup,null);
+        }
+        return Result.success(getGroupVO(imChatGroup,imChatGroupUser));
     }
 
     public GroupVO getGroupVO(ImChatGroup imChatGroup,ImChatGroupUser imChatGroupUser){
@@ -112,14 +156,29 @@ public class ImChatGroupController {
         groupVO.setGroupName(imChatGroup.getGroupName());
         groupVO.setGroupType(imChatGroup.getGroupType());
         groupVO.setId(imChatGroup.getId());
-        groupVO.setCreateTime(imChatGroupUser.getCreateTime());
+        if(imChatGroupUser!=null){
+            groupVO.setCreateTime(imChatGroupUser.getCreateTime());
+            groupVO.setAdminFlag(imChatGroupUser.getAdminFlag());
+            groupVO.setUserStatus(imChatGroupUser.getUserStatus());
+            groupVO.setMasterFlag(imChatGroup.getMasterUserId().intValue()==imChatGroupUser.getUserId());
+            groupVO.setIsMember(true);
+        }else{
+            groupVO.setAdminFlag(false);
+            groupVO.setCreateTime(imChatGroup.getCreateTime());
+            groupVO.setUserStatus(ImConfigConst.GROUP_USER_STATUS_BAN);
+            groupVO.setMasterFlag(false);
+            groupVO.setIsMember(false);
+        }
+        LambdaQueryChainWrapper<ImChatGroupUser> wrapper=imChatGroupUserService.lambdaQuery();
+        groupVO.setMemberCount(wrapper.eq(ImChatGroupUser::getGroupId,imChatGroup.getId())
+                        .eq(ImChatGroupUser::getUserStatus,ImConfigConst.GROUP_USER_STATUS_PASS)
+                        .or(s->s.eq(ImChatGroupUser::getUserStatus,ImConfigConst.GROUP_USER_STATUS_SILENCE))
+                .count());
         groupVO.setAvatar(imChatGroup.getAvatar());
         groupVO.setIntroduction(imChatGroup.getIntroduction());
         groupVO.setNotice(imChatGroup.getNotice());
-        groupVO.setAdminFlag(imChatGroupUser.getAdminFlag());
         groupVO.setInType(imChatGroup.getInType());
-        groupVO.setUserStatus(imChatGroupUser.getUserStatus());
-        groupVO.setMasterFlag(imChatGroup.getMasterUserId().intValue()==imChatGroupUser.getUserId());
+        groupVO.setMasterName(commonQuery.getUser(imChatGroup.getMasterUserId()).getName());
         return groupVO;
     }
 
@@ -147,6 +206,7 @@ public class ImChatGroupController {
         imChatGroupUser.setRemark(SecurityUtils.getUser().getName());
         imChatGroupUser.setCreateTime(LocalDateTime.now());
         imChatGroupUser.setVerifyUserId(ImConfigConst.GROUP_DEFAULT_VERIFY_USER_ID);
+        imChatGroupUser.setUserId(imChatGroup.getMasterUserId());
 
         imChatGroupUserService.save(imChatGroupUser);
 
@@ -160,7 +220,7 @@ public class ImChatGroupController {
     @GetMapping("/join")
     @LogNote(description="加入群聊")
     @Operation(summary="加入群聊")
-    public Result<Boolean> joinGroup(@RequestParam Integer groupId){
+    public Result<Boolean> joinGroup(@RequestParam("groupId") Integer groupId){
         SysUserDetails user = SecurityUtils.getUser();
         ImChatGroup group=imChatGroupService.getById(groupId);
 
@@ -255,14 +315,13 @@ public class ImChatGroupController {
             flag="save";
         }
         imChatGroupUser.setUserStatus(status);
-        if(status==1){
-            if(flag.equals("update")){
-                imChatGroupUserService.updateById(imChatGroupUser);
-            }else{
-                imChatGroupUserService.save(imChatGroupUser);
-            }
+        if(flag.equals("update")){
+            imChatGroupUserService.updateById(imChatGroupUser);
         }else{
-            redisUtil.set(imChatGroupUser.getUserId().toString()+"_"+imChatGroupUser.getGroupId()+"_"+flag,imChatGroupUser,ImConfigConst.REDIS_EXPIRE_TIME);
+            imChatGroupUserService.save(imChatGroupUser);
+        }
+        if(status!=1) {
+            redisUtil.set(imChatGroupUser.getUserId().toString() + "_" + imChatGroupUser.getGroupId(), imChatGroupUser, ImConfigConst.REDIS_EXPIRE_TIME);
         }
     }
 
@@ -325,37 +384,32 @@ public class ImChatGroupController {
         if(imChatGroup==null){
             return Result.failed("群聊不存在");
         }
-        ImChatGroupUser imChatGroupUser=imChatGroupUserService.lambdaQuery()
-                .eq(ImChatGroupUser::getUserId,userId)
-                .eq(ImChatGroupUser::getGroupId,groupId)
-                .eq(ImChatGroupUser::getUserStatus,ImConfigConst.GROUP_USER_STATUS_NOT_VERIFY).one();
         String content="";
-        if(imChatGroupUser!=null){
-            imChatGroupUserService.lambdaUpdate()
-                    .eq(ImChatGroupUser::getUserId,userId)
-                    .eq(ImChatGroupUser::getGroupId,groupId)
-                    .set(ImChatGroupUser::getUserStatus,Convert.toInt(isPass)==1 ?
-                            ImConfigConst.GROUP_USER_STATUS_PASS:ImConfigConst.GROUP_USER_STATUS_BAN).update();
-        }else{
-            imChatGroupUser=redisUtil.get(userId+"+"+groupId+"_save");
+        ImChatGroupUser imChatGroupUser=redisUtil.get(userId+"+"+groupId);
             if(imChatGroupUser==null){
+                imChatGroupUserService.lambdaUpdate()
+                        .eq(ImChatGroupUser::getUserId,userId)
+                        .eq(ImChatGroupUser::getGroupId,groupId)
+                        .remove();
                 //通知申请审核逾期
                 content="您对于"+imChatGroup.getGroupName()+"群聊的入群申请逾期未通过";
                 ImChatUserGroupMessage imChatUserMessage=SysPushMessage.builderMessage(imChatGroupUser.getGroupId().toString(),userId,content);
                 SysPushMessage.send(userId,imChatUserMessage, imChatGroupUser.getGroupId());
                 return Result.failed("申请已经过期");
             }else{
-                imChatGroupUser.setUserStatus(ImConfigConst.GROUP_USER_STATUS_PASS);
-                imChatGroupUserService.save(imChatGroupUser);
-                redisUtil.del(userId+"+"+groupId+"_save");
+                redisUtil.del(userId+"+"+groupId);
+                imChatGroupUserService.lambdaUpdate()
+                        .eq(ImChatGroupUser::getUserId,userId)
+                        .eq(ImChatGroupUser::getGroupId,groupId)
+                        .set(ImChatGroupUser::getUserStatus,Convert.toInt(isPass)==1 ?
+                                ImConfigConst.GROUP_USER_STATUS_PASS:ImConfigConst.GROUP_USER_STATUS_BAN).update();
                 //通知申请审核通过
-                content="您对于"+imChatGroup.getGroupName()+"群聊的入群申请已通过";
+                content="您对于"+imChatGroup.getGroupName()+"群聊的入群申请";
+                content+=isPass.equals("1")?"已通过":"未通过";
                 ImChatUserGroupMessage imChatUserMessage=SysPushMessage.builderMessage(imChatGroupUser.getGroupId().toString(),userId,content);
                 SysPushMessage.send(userId,imChatUserMessage, imChatGroupUser.getGroupId());
                 return Result.success();
             }
-        }
-        return Result.failed("服务器异常");
     }
 
     //TODO: 获取群申请列表
@@ -373,30 +427,37 @@ public class ImChatGroupController {
                 .eq(ImChatGroup::getMasterUserId,SecurityUtils.getUserId())
                 .select(ImChatGroup::getId).list();
 
-        List<Integer> groupIds=null;
-        if(imChatGroupUsers != null && chatGroups != null) {
-            groupIds = imChatGroupUsers.stream().map(ImChatGroupUser::getGroupId).toList();
+        List<Integer> groupIds=new ArrayList<>();
+        if(!imChatGroupUsers.isEmpty() && !chatGroups.isEmpty()) {
+            groupIds = imChatGroupUsers.stream().map(ImChatGroupUser::getGroupId).collect(Collectors.toList());
             groupIds.addAll(chatGroups.stream().map(ImChatGroup::getId).toList());
-        }else if (imChatGroupUsers!=null){
+        }else if (!imChatGroupUsers.isEmpty()){
             groupIds = imChatGroupUsers.stream().map(ImChatGroupUser::getGroupId).toList();
-        }else if(chatGroups!=null){
+        }else if(!chatGroups.isEmpty()){
             groupIds = chatGroups.stream().map(ImChatGroup::getId).toList();
         }
-        if(groupIds!=null){
+        if(!groupIds.isEmpty()){
             List<ImChatGroupUser> applications = imChatGroupUserService.lambdaQuery()
                     .eq(ImChatGroupUser::getUserStatus, ImConfigConst.GROUP_USER_STATUS_NOT_VERIFY)
                     .in(ImChatGroupUser::getGroupId, groupIds).list();
 
-            List<GroupUserVO> userVOList=applications.stream().map(item->{
-                GroupUserVO vo=getGroupUserVO(item,imChatGroupService.lambdaQuery().
-                        eq(ImChatGroup::getId,item.getGroupId()).one(),userService.lambdaQuery()
-                        .eq(Users::getId,item.getUserId()).one());
-                return vo;
-            }).toList();
-
+            List<GroupUserVO> userVOList=applications.stream().map(item-> {
+                if(!redisUtil.hasKey(item.getUserId()+"_"+item.getGroupId())){
+                    item.setUserStatus(ImConfigConst.GROUP_USER_STATUS_BAN);
+                    imChatGroupUserService.lambdaUpdate().
+                            eq(ImChatGroupUser::getUserId, item.getUserId())
+                            .eq(ImChatGroupUser::getGroupId,item.getGroupId())
+                            .remove();
+                }
+                return getGroupUserVO(item, imChatGroupService.lambdaQuery().
+                        eq(ImChatGroup::getId, item.getGroupId()).one(), userService.lambdaQuery()
+                        .eq(Users::getId, item.getUserId()).one());
+            }
+            ).collect(Collectors.toList());
+            userVOList.removeIf(item->!redisUtil.hasKey(item.getUserId()+"_"+item.getGroupId()));
             return Result.success(userVOList);
         }
-        return Result.failed("暂无数据");
+        return Result.result("B0001","暂无数据",new ArrayList<>());
     }
 
     public GroupUserVO getGroupUserVO(ImChatGroupUser imChatGroupUser,ImChatGroup imChatGroup,Users users){

@@ -18,7 +18,7 @@ public class WmsCache {
     private final static Map<String, Entity> map = new ConcurrentHashMap<>();
 
     @Getter
-    private final static Map<Integer,Integer> twainMap=new HashMap<>();
+    private final static Map<Integer,String> twainMap=new HashMap<>();
 
     //定时器线程池，用于清除过期缓存
     private final static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();

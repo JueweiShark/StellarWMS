@@ -140,4 +140,12 @@ public class TextUtil {
         }
         return true;
     }
+
+    public static boolean isEmail(String email) {
+        return email!= null && email.matches("\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*");
+    }
+
+    public static String randomSixCode() {
+        return String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+    }
 }

@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.wmsspringbootproject.Service.*;
 import com.example.wmsspringbootproject.Utils.TextUtil;
+import com.example.wmsspringbootproject.common.Annotation.Subject;
+import com.example.wmsspringbootproject.common.designmode.TransactionNotify;
 import com.example.wmsspringbootproject.converter.TransactionConverter;
 import com.example.wmsspringbootproject.mapper.ProductMapper;
 import com.example.wmsspringbootproject.mapper.ProductTypeMapper;
@@ -20,6 +22,7 @@ import com.example.wmsspringbootproject.model.vo.ProductVO;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.model.vo.TransactionVO;
 import io.swagger.models.auth.In;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.util.TxUtils;
@@ -92,7 +95,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         transactionVOIPage.setTotal(transactionList.getTotal());
         return Result.success(transactionVOIPage);
     }
-
+    @Subject(observer = TransactionNotify.class,filedName="create_transaction")
     @Override
     public Result<Boolean> saveTransaction(TransactionsForm form) {
         System.out.println(form);
@@ -136,6 +139,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     }
 
     @Override
+    @Subject(observer = TransactionNotify.class,filedName = "update_transaction")
     public Result<Boolean> updateTransaction(TransactionsForm form) {
         Transactions transaction = this.getById(form.getId());
         if (transaction != null) {

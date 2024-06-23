@@ -52,7 +52,7 @@ public class ImChatUserMessageController {
                 .eq(ImChatUserMessage::getFromId, ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID).list();
 
         List<ImChatUserGroupMessage> groupMessages=imChatUserGroupMessageService.lambdaQuery()
-                .eq(ImChatUserGroupMessage::getToId,uid)
+                .like(ImChatUserGroupMessage::getToId,uid)
                 .eq(ImChatUserGroupMessage::getFromId, ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID).list();
         List<ImMessage> imMessageList=new ArrayList<>(groupMessages.stream()
                 .map(SysPushMessage::getImMessage).toList());

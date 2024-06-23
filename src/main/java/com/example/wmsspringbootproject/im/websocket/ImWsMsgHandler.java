@@ -2,10 +2,7 @@ package com.example.wmsspringbootproject.im.websocket;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.example.wmsspringbootproject.Utils.CommonQuery;
-import com.example.wmsspringbootproject.Utils.SecurityUtils;
-import com.example.wmsspringbootproject.Utils.TextUtil;
-import com.example.wmsspringbootproject.Utils.WmsCache;
+import com.example.wmsspringbootproject.Utils.*;
 import com.example.wmsspringbootproject.constants.Constants;
 import com.example.wmsspringbootproject.core.security.model.SysUserDetails;
 import com.example.wmsspringbootproject.im.http.entity.ImChatGroupUser;
@@ -57,6 +54,9 @@ public class ImWsMsgHandler implements IWsMsgHandler {
 
     @Autowired
     private CommonQuery commonQuery;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
     /**
      * 握手时走这个方法，业务可以在这里获取cookie，request等
      * 对httpResponse参数进行补充并返回，如果返回null表示不想和对方建立连接
@@ -77,7 +77,14 @@ public class ImWsMsgHandler implements IWsMsgHandler {
             System.out.println(result);
         }
         System.out.println(user);
-        if (user == null) {
+        if (user == null&&jwtTokenUtil.validateToken(token)) {
+            user=jwtTokenUtil.getUser(token);
+            if(user!=null){
+                WmsCache.put(token,user,Constants.TOKEN_EXPIRE);
+                WmsCache.put(String.valueOf(user.getId()),token,Constants.TOKEN_EXPIRE);
+            }
+        }
+        if(user==null){
             System.out.println("用户为空");
             return null;
         }
@@ -95,6 +102,7 @@ public class ImWsMsgHandler implements IWsMsgHandler {
         String token = httpRequest.getParam(Constants.TOKEN_HEADER);
         // TODO 获取当前登录的用户
         SysUserDetails user = (SysUserDetails) WmsCache.get(token);
+
         Tio.closeUser(channelContext.tioConfig, String.valueOf(user.getId()), null);
         Tio.bindUser(channelContext, String.valueOf(user.getId()));
 
@@ -103,7 +111,8 @@ public class ImWsMsgHandler implements IWsMsgHandler {
                 .eq(ImChatUserMessage::getToId, user.getId())
                 .eq(ImChatUserMessage::getMessageStatus, ImConfigConst.USER_MESSAGE_STATUS_FALSE)
                 .or(ms->
-                        ms.eq(ImChatUserMessage::getFromId,ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID))
+                        ms.eq(ImChatUserMessage::getFromId,ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID)
+                                .eq(ImChatUserMessage::getMessageStatus, ImConfigConst.USER_MESSAGE_STATUS_FALSE))
                 .orderByAsc(ImChatUserMessage::getCreateTime).list();
 
         //TODO 遍历消息列表 推送到目标用户
@@ -116,18 +125,22 @@ public class ImWsMsgHandler implements IWsMsgHandler {
                 imMessage.setFromId(userMessage.getFromId());
                 imMessage.setToId(Integer.parseInt(userMessage.getToId()));
                 imMessage.setMessageType(ImEnum.MESSAGE_TYPE_MSG_SINGLE.getCode());
+                if(imMessage.getFromId().equals(ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID)){
+                    imMessage.setUsername("StellarWms系统");
+                }
                 Users friend = commonQuery.getUser(userMessage.getFromId());
                 if (friend != null) {
                     imMessage.setAvatar(friend.getAvatar());
                 }
                 WsResponse wsResponse = WsResponse.fromText(JSON.toJSONString(imMessage), ImConfigConst.CHARSET);
-                Tio.sendToUser(channelContext.tioConfig, String.valueOf(user.getId()), wsResponse);
+                Tio.sendToUser(channelContext.tioConfig, String.valueOf(imMessage.getToId()), wsResponse);
             });
             //TODO  更新数据库中消息的状态为已读
             imChatUserMessageService.lambdaUpdate().in(ImChatUserMessage::getId, ids)
                     .set(ImChatUserMessage::getMessageStatus, ImConfigConst.USER_MESSAGE_STATUS_TRUE).update();
 
         }
+
 
         //TODO 找到用户所在的所有（群状态是：1、验证通过的  2、被禁言的）群
         LambdaQueryChainWrapper<ImChatGroupUser> lambdaQuery = imChatGroupUserService.lambdaQuery();
@@ -191,7 +204,7 @@ public class ImWsMsgHandler implements IWsMsgHandler {
                 //将消息存入缓存中
                 messageCache.putUserMessage(userMessage);
                 //将消息发送给 发送方
-//                Tio.sendToUser(channelContext.tioConfig, imMessage.getFromId().toString(), wsResponse);
+                Tio.sendToUser(channelContext.tioConfig, imMessage.getFromId().toString(), wsResponse);
             } else if (imMessage.getMessageType().intValue() == ImEnum.MESSAGE_TYPE_MSG_GROUP.getCode()) {
                 //群聊
                 ImChatUserGroupMessage groupMessage = new ImChatUserGroupMessage();

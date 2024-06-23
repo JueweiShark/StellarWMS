@@ -20,9 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @author 老白
- */
+
 @Component
 public class JwtTokenUtil {
 
@@ -32,14 +30,12 @@ public class JwtTokenUtil {
      * 后台程序通过对Authorization头中信息的解码及数字签名校验来获取其中的用户信息，从而实现认证和授权。
      * 相关方法说明：
      * <p>
-     * generateToken(UserDetails userDetails) :用于根据登录用户信息生成token
      * getUserNameFromToken(String token)：从token中获取登录用户的信息
      * validateToken(String token, UserDetails userDetails)：判断token是否还有效
      */
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtil.class);
-    private static final String CLAIM_KEY_USERNAME = "sub";
-    private static final String CLAIM_KEY_CREATED = "created";
+
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.expiration}")

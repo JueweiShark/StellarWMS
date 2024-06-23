@@ -67,7 +67,9 @@ public class WebSpringSecurityConfig{
                         "/swagger-ui-custom.html",
                         "/ws/**",
                         "/ws-app/**",
-                        "ws://localhost:9427/**"
+                        "ws://localhost:9427/**",
+                        "/mail/code/sendEmail",
+                        "/wx/getWechatQrCode"
                 );
     }
 

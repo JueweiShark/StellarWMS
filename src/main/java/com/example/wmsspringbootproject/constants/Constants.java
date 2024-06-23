@@ -17,6 +17,14 @@ public interface Constants {
 
     String TOKEN_HEADER = "Authorization";
 
+    Long  CREATE_TRANSACTION_NOTIFY_ID=0L; //创建事务的 通知消息 的fromId
+
+    Long CONFIRM_TRANSACTION_NOTIFY_ID=-2L; //确认事务的 通知消息 的fromId
+
+    Long TRANSACTION_ISSUE_REPORT=-3L; //事务问题上报的 通知消息 的fromId
+
+    Long TRANSACTION_AUDIT_SUCCESS=-4L; //事务审核完成的 通知消息 的fromId
+
 
     interface PageQuery{
         int DEFAULT_PAGE=1;
@@ -99,5 +107,12 @@ public interface Constants {
         String IP_HISTORY_IP = "ip_history_ip";
         String IP_HISTORY_HOUR = "ip_history_hour";
          String IP_HISTORY_COUNT = "ip_history_count";
+    }
+
+    interface transactionStatus{
+        Integer CREATE_SUCCESS=1; //创建任务 通知仓库管理者、管理员、超级管理员
+        Integer ISSUE_REPORT=-1; //问题上报 通知 创建者
+        Integer CONFIRM=2; //确认 通知 管理员、超级管理员
+        Integer AUDIT_SUCCESS=3; //已审核完成 通知 创建者
     }
 }
