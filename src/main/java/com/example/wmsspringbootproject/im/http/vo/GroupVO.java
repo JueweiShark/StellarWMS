@@ -27,11 +27,20 @@ public class GroupVO {
     @Schema(description="群简介")
     private String introduction;
 
+    @Schema(description = "群主名字")
+    private String masterName;
+
+    @Schema(description = "群成员人数")
+    private Long memberCount;
+
     @Schema(description="类型[1:聊天群，2:话题]")
     private Integer groupType;
 
     @Schema(description="群公告")
     private String notice;
+
+    @Schema(description = "是否为群成员")
+    private Boolean isMember;
 
     @Schema(description="是否群主[0:否，1:是]")
     private Boolean masterFlag;

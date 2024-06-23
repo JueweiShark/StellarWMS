@@ -2,15 +2,14 @@ package com.example.wmsspringbootproject.im.http.controller;
 
 import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.example.wmsspringbootproject.Utils.CommonQuery;
-import com.example.wmsspringbootproject.Utils.RedisUtil;
-import com.example.wmsspringbootproject.Utils.SecurityUtils;
-import com.example.wmsspringbootproject.Utils.SysPushMessage;
+import com.example.wmsspringbootproject.Utils.*;
+import com.example.wmsspringbootproject.common.Annotation.LogNote;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.im.http.entity.ImChatUserFriend;
 import com.example.wmsspringbootproject.im.http.entity.ImChatUserMessage;
 import com.example.wmsspringbootproject.im.http.service.ImChatUserFriendService;
 import com.example.wmsspringbootproject.im.http.vo.UserFriendVO;
+import com.example.wmsspringbootproject.im.websocket.MessageCache;
 import com.example.wmsspringbootproject.im.websocket.constants.ImConfigConst;
 import com.example.wmsspringbootproject.model.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,10 +17,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.tio.websocket.common.WsResponse;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,6 +40,9 @@ public class ImChatUserFriendController {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    MessageCache messageCache;
 
     //TODO 删除好友
     /**
@@ -66,22 +70,39 @@ public class ImChatUserFriendController {
             return Result.failed("删除好友失败");
         }
     }
+
+    //TODO 记录聊天对象 //twainId 单聊 加前缀solo_ 群聊group_
+    @GetMapping("/record")
+    @LogNote(description="记录聊天对象")
+    @Operation(summary = "记录聊天对象")
+    public Result<Boolean> recordFriend(@RequestParam("twainId")String twainId){
+        Long uid=SecurityUtils.getUserId();
+        if(TextUtil.textIsEmpty(WmsCache.getTwainMap().get(Convert.toInt(uid)))){
+            WmsCache.getTwainMap().put(Convert.toInt(uid),twainId);
+        }
+        if(!WmsCache.getTwainMap().get(Convert.toInt(uid)).equals(twainId)){
+            WmsCache.getTwainMap().replace(Convert.toInt(uid),twainId);
+        }
+        return Result.success();
+    }
+
+
     //TODO 添加好友
     @PostMapping("/add")
+    @LogNote(description="添加好友")
     @Operation(summary = "添加好友")
     public Result<Boolean> addFriend(@RequestParam("friendId")String friendId){
         Long uid=SecurityUtils.getUserId();
+        List<Integer> statusList=new ArrayList<>();
+        statusList.add(ImConfigConst.FRIEND_STATUS_BAN);
+        statusList.add(ImConfigConst.FRIEND_STATUS_NOT_VERIFY);
         ImChatUserFriend chatUserFriend=friendService.lambdaQuery()
                 .eq(ImChatUserFriend::getFriendId,friendId)
                 .eq(ImChatUserFriend::getUserId,uid)
-                .eq(ImChatUserFriend::getFriendStatus,ImConfigConst.FRIEND_STATUS_BAN).one();
-        if(chatUserFriend!=null){
+                .in(ImChatUserFriend::getFriendStatus,statusList).one();
+        if(chatUserFriend!=null&&chatUserFriend.getFriendStatus()==ImConfigConst.FRIEND_STATUS_BAN){
             friendService.lambdaUpdate().eq(ImChatUserFriend::getUserId,uid)
                     .eq(ImChatUserFriend::getFriendId,friendId)
-                    .set(ImChatUserFriend::getFriendStatus,ImConfigConst.FRIEND_STATUS_NOT_VERIFY)
-                    .update();
-            friendService.lambdaUpdate().eq(ImChatUserFriend::getUserId,friendId)
-                    .eq(ImChatUserFriend::getFriendId,uid)
                     .set(ImChatUserFriend::getFriendStatus,ImConfigConst.FRIEND_STATUS_NOT_VERIFY)
                     .update();
         }
@@ -97,32 +118,42 @@ public class ImChatUserFriendController {
         //通知申请目标进行审核
         String content=SecurityUtils.getUser().getName()+"申请添加您为好友";
         ImChatUserMessage imChatUserMessage= SysPushMessage.builderMessage(users.getId(),content);
+        messageCache.putUserMessage(imChatUserMessage);
         SysPushMessage.send(imChatUserMessage);
         return Result.result("200","申请添加好友成功，待审核",true);
     }
     //TODO 获取好友列表
-    @PostMapping("/list")
+    @GetMapping("/list")
     @Operation(summary = "获取列表信息[申请列表:0,好友列表：1]")
     public Result<List<UserFriendVO>> getFriendList(@RequestParam("status") String status){
         Long uid=SecurityUtils.getUserId();
         LambdaQueryChainWrapper<ImChatUserFriend> query=friendService.lambdaQuery();
+        query.eq(ImChatUserFriend::getFriendStatus,Convert.toInt(status));
         if(status.equals("0")){
-            query.eq(ImChatUserFriend::getFriendId,uid);
+            query.and(select->
+                            select.eq(ImChatUserFriend::getFriendId,uid)
+                                    .or(item->item.eq(ImChatUserFriend::getUserId,uid)));
         }else{
             query.eq(ImChatUserFriend::getUserId,uid);
         }
         List<ImChatUserFriend> friendList=query
-               .eq(ImChatUserFriend::getFriendStatus,status)
                .list();
-        List<UserFriendVO> userFriendVOS=new ArrayList<>(friendList.stream().map(i->
-                getUserFriendVO(commonQuery.getUser(i.getFriendId()),i)).toList());
-        if(status.equals("0")){
-            userFriendVOS.removeIf(f->redisUtil.hasKey(f.getId().toString()));
+        if(!friendList.isEmpty()){
+            List<UserFriendVO> userFriendVOS=new ArrayList<>(friendList.stream().map(i->
+                    getUserFriendVO(commonQuery.getUser(status.equals("0")?
+                            Objects.equals(i.getUserId(),Convert.toInt(uid))?i.getFriendId():i.getUserId()
+                            :i.getFriendId()),i)).toList());
+            ImChatUserFriend imChatUserFriend=redisUtil.get(userFriendVOS.get(0).getUserId()+"_"+userFriendVOS.get(0).getFriendId());
+            if(status.equals("0")){
+                userFriendVOS.removeIf(f->!redisUtil.hasKey(f.getUserId()+"_"+f.getFriendId()));
+            }
+            return Result.success(userFriendVOS);
+        }else{
+            return Result.result("200","暂无好友",new ArrayList<UserFriendVO>());
         }
-        return Result.success(userFriendVOS);
     }
     //TODO 获取好友详情
-    @PostMapping("/detail")
+    @GetMapping("/detail")
     @Operation(summary = "获取好友详情[前端vo对象中的id]")
     public Result<UserFriendVO> getFriendDetail(@RequestParam("id") String id){
         ImChatUserFriend imChatUserFriend=friendService.lambdaQuery().eq(ImChatUserFriend::getId,id).one();
@@ -143,22 +174,29 @@ public class ImChatUserFriendController {
         }
         boolean result=friendService.lambdaUpdate().set(ImChatUserFriend::getFriendStatus,isPass)
                 .eq(ImChatUserFriend::getId,id).update();
-
-        ImChatUserFriend chatUserFriend=new ImChatUserFriend();
-        chatUserFriend.setFriendStatus(ImConfigConst.FRIEND_STATUS_PASS);
-        chatUserFriend.setFriendId(friend.getUserId());
-        chatUserFriend.setUserId(friend.getFriendId());
-        chatUserFriend.setRemark(remark);
-        chatUserFriend.setCreateTime(LocalDateTime.now());
-        boolean result1=friendService.save(chatUserFriend);
-
-        String content=SecurityUtils.getUser().getName()+"通过了您的好友申请，你可以去跟他打招呼了";
+        String content="";
+        if(isPass.equals("1")){
+            content=SecurityUtils.getUser().getName()+"通过了您的好友申请，你可以去跟他打招呼了";
+        }else{
+            content=SecurityUtils.getUser().getName()+"拒绝了您的好友申请";
+        }
         ImChatUserMessage imChatUserMessage= SysPushMessage.builderMessage(friend.getUserId(),content);
         SysPushMessage.send(imChatUserMessage);
-        return Result.result("200",result && result1?"审核通过":"操作异常，请稍后重试！",result && result1);
+        if(isPass.equals("1")){
+            ImChatUserFriend chatUserFriend=new ImChatUserFriend();
+            chatUserFriend.setFriendStatus(ImConfigConst.FRIEND_STATUS_PASS);
+            chatUserFriend.setFriendId(friend.getUserId());
+            chatUserFriend.setUserId(friend.getFriendId());
+            chatUserFriend.setRemark(remark);
+            chatUserFriend.setCreateTime(LocalDateTime.now());
+            boolean result1=friendService.save(chatUserFriend);
+            return Result.result("200",result && result1?"审核通过":"操作异常，请稍后重试！",result && result1);
+        }else{
+            return Result.failed("您拒绝该好友申请");
+        }
     }
     //TODO 修改好友备注
-    @PostMapping("/remark")
+    @GetMapping("/remark")
     @Operation(summary = "修改好友备注")
     public Result<Boolean> modifyFriendRemark(@RequestParam("id") String id, @RequestParam("remark")String remark){
         if(!remark.isEmpty()){
