@@ -1,8 +1,10 @@
 package com.example.wmsspringbootproject.Service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,7 +14,11 @@ import com.example.wmsspringbootproject.Service.SysUserTypeService;
 import com.example.wmsspringbootproject.Service.UserService;
 import com.example.wmsspringbootproject.Utils.JwtTokenUtil;
 import com.example.wmsspringbootproject.Utils.TextUtil;
+import com.example.wmsspringbootproject.Utils.WmsCache;
 import com.example.wmsspringbootproject.common.result.ResultCode;
+import com.example.wmsspringbootproject.constants.Constants;
+import com.example.wmsspringbootproject.core.security.model.SysUserDetails;
+import com.example.wmsspringbootproject.model.dto.LoginResult;
 import com.example.wmsspringbootproject.model.entity.*;
 import com.example.wmsspringbootproject.model.query.ProductQuery;
 import com.example.wmsspringbootproject.model.vo.ProductVO;
@@ -23,11 +29,17 @@ import com.example.wmsspringbootproject.model.form.UserForm;
 import com.example.wmsspringbootproject.model.query.UserQuery;
 import com.example.wmsspringbootproject.model.vo.UserVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -212,10 +224,7 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
         }
         return Result.failed(ResultCode.USER_NOT_EXIST);
     }
-    public Result LoginByEMail(UserForm userForm, Users users){
-        if(userForm.getEmail().equals(users.getEmail())){
-            return Result.success(userForm);
-        }
-        return Result.failed(ResultCode.USER_NOT_EXIST);
-    }
+    public Result LoginByEMail(UserForm userForm) {
+    return null;
+}
 }

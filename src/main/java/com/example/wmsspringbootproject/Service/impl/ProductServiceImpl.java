@@ -38,6 +38,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Products> imp
 //    private final ProductTypeService productTypeService;
     @Override
     public Result<IPage<ProductVO>> productList(ProductQuery query) {
+        System.out.println(query);
         LambdaQueryWrapper<Products> queryWrapper=new LambdaQueryWrapper<>();
         Page<Products> productPage=new Page<>(query.getPageNum(),query.getPageSize());
         if (query != null) {
