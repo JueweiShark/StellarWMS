@@ -52,6 +52,7 @@ public class AuthUserServiceImpl implements AuthUserService {
     @LogNote(description = "登录功能")
     @Override
     public Result<LoginResult> Login(UserForm userForm) {
+
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userForm.getName(),userForm.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
