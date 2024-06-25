@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.wmsspringbootproject.Utils.CommonQuery;
 import com.example.wmsspringbootproject.Utils.SysPushMessage;
 import com.example.wmsspringbootproject.Utils.TextUtil;
+import com.example.wmsspringbootproject.common.Annotation.LogNote;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.constants.Constants;
 import com.example.wmsspringbootproject.im.http.entity.ImChatGroup;
@@ -45,6 +46,7 @@ public class ImChatUserGroupMessageController {
 
     //TODO: 获取群消息列表
     @GetMapping("/list")
+    @LogNote(description = "获取群消息列表")
     @Operation(summary="获取群消息列表")
     public Result<Page<GroupMessageVO>> groupMessageList(@RequestParam("groupId")String groupId,
                                    @RequestParam("page")Integer page,
@@ -52,7 +54,8 @@ public class ImChatUserGroupMessageController {
                                    @RequestParam("currentTime")String currentTime
     ){
         LambdaQueryChainWrapper<ImChatUserGroupMessage> wrapper=imChatUserGroupMessageService.lambdaQuery();
-        wrapper.eq(ImChatUserGroupMessage::getToId, groupId);
+        wrapper.eq(ImChatUserGroupMessage::getToId, groupId)
+                .ne(ImChatUserGroupMessage::getFromId,ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID);
 
         wrapper.and(query->query.ge(ImChatUserGroupMessage::getCreateTime, TextUtil.getBeforeAnyTime(TextUtil.parestDate(currentTime,null), Constants.TimeValueInMillions.MONTH))
                 .le(ImChatUserGroupMessage::getCreateTime,currentTime));
