@@ -140,36 +140,45 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
     @Override
     public Result<Boolean> updateUser(UserForm userForm) {
         int id=userForm.getId();
-        String name = userForm.getName();
-        String phone=userForm.getPhone();
-        String email=userForm.getEmail();
-        long count = this.count(new LambdaQueryWrapper<Users>()
-                .eq(Users::getName, name)
-                .ne(Users::getId, id)
-        );
-        long count1 = this.count(new LambdaQueryWrapper<Users>()
-                .eq(Users::getPhone, phone)
-                .ne(Users::getId, id)
-        );
-        long count2 = this.count(new LambdaQueryWrapper<Users>()
-                .eq(Users::getEmail, email)
-                .ne(Users::getId, id)
-        );
-        if(count!=0){
-            return Result.failed(ResultCode.USER_NAME_EXISTS);
+        System.out.println(userForm.getAvatar());
+        if(userForm.getAvatar().isEmpty()){
+            String name = userForm.getName();
+            String phone=userForm.getPhone();
+            String email=userForm.getEmail();
+            long count = this.count(new LambdaQueryWrapper<Users>()
+                    .eq(Users::getName, name)
+                    .ne(Users::getId, id)
+            );
+            long count1 = this.count(new LambdaQueryWrapper<Users>()
+                    .eq(Users::getPhone, phone)
+                    .ne(Users::getId, id)
+            );
+            long count2 = this.count(new LambdaQueryWrapper<Users>()
+                    .eq(Users::getEmail, email)
+                    .ne(Users::getId, id)
+            );
+            if(count!=0){
+                return Result.failed(ResultCode.USER_NAME_EXISTS);
+            }
+            if(count1!=0){
+                return Result.failed(ResultCode.USER_PHONE_EXISTS);
+            }
+            if(count2!=0){
+                return Result.failed(ResultCode.USER_EMAIL_EXISTS);
+            }
+            Users entity = userConverter.form2Entity(userForm);
+            entity.setId(id);
+            entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+            sysUserTypeService.updateUserType(id,userForm.getTypeId());
+            boolean result = this.updateById(entity);
+            return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
+        }else{
+            Users entity = userConverter.form2Entity(userForm);
+            entity.setId(id);
+            entity.setAvatar(userForm.getAvatar());
+            boolean result = this.updateById(entity);
+            return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
         }
-        if(count1!=0){
-            return Result.failed(ResultCode.USER_PHONE_EXISTS);
-        }
-        if(count2!=0){
-            return Result.failed(ResultCode.USER_EMAIL_EXISTS);
-        }
-        Users entity = userConverter.form2Entity(userForm);
-        entity.setId(id);
-        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
-        sysUserTypeService.updateUserType(id,userForm.getTypeId());
-        boolean result = this.updateById(entity);
-        return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
     }
 
     @Override

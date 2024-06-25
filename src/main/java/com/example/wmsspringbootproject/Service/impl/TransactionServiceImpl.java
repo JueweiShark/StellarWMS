@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.wmsspringbootproject.Service.ProductService;
-import com.example.wmsspringbootproject.Service.ProductTypeService;
-import com.example.wmsspringbootproject.Service.TransactionProductService;
-import com.example.wmsspringbootproject.Service.TransactionService;
+import com.example.wmsspringbootproject.Service.*;
 import com.example.wmsspringbootproject.Utils.TextUtil;
 import com.example.wmsspringbootproject.common.Annotation.Subject;
 import com.example.wmsspringbootproject.common.designmode.TransactionNotify;
@@ -41,6 +38,10 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     @Autowired
     private TransactionProductService productService;
     @Autowired
+    private TransactionTypesService transactionTypesService;
+    @Autowired
+    private WareHouseService wareHouseService;
+    @Autowired
     private TransactionConverter transactionConverter;
     @Autowired
     private ProductTypeMapper productTypeMapper;
@@ -66,15 +67,14 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             queryWrapper.ge(Transactions::getUpdateTime, query.getStartTime());
             queryWrapper.le(Transactions::getUpdateTime, query.getEndTime());
         }
-        if (Integer.valueOf(query.getStatus()) > -1){
+        System.out.println(query.getStatus());
+        if (Integer.valueOf(query.getStatus()) >= -1){
             if (Integer.valueOf(query.getStatus())==-1)
                 queryWrapper.gt(Transactions::getStatus, Integer.valueOf(query.getStatus()));
             if (Integer.valueOf(query.getStatus())==1)
                 queryWrapper.eq(Transactions::getStatus, Integer.valueOf(query.getStatus()));
             if (Integer.valueOf(query.getStatus())==2)
                 queryWrapper.eq(Transactions::getStatus, Integer.valueOf(query.getStatus()));
-        }else {
-            queryWrapper.eq(Transactions::getStatus,Integer.valueOf(query.getStatus()));
         }
 
         if (TextUtil.isNotEmpty(query.getDeleted())){
@@ -85,6 +85,8 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         IPage<TransactionVO> transactionVOIPage = new Page<>();
         transactionVOIPage.setRecords(transactionList.getRecords().stream().map(transaction -> {
             TransactionVO transactionVO = transactionConverter.entity2Vo(transaction);
+            transactionVO.setTransactionTypeName(transactionTypesService.SelectNameById(Integer.parseInt(transaction.getTransactionType())).getName());
+            transactionVO.setWarehouseName(wareHouseService.getWareHouseDetails(Math.toIntExact(transaction.getWarehouseId())).getData().getName());
             return transactionVO;
         }).toList());
         transactionVOIPage.setPages(transactionList.getPages());

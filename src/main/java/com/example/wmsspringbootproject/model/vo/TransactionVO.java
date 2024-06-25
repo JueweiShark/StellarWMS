@@ -15,7 +15,9 @@ public class TransactionVO {
     @Schema(description = "事务描述")
     private String description;
     @Schema(description = "事务类型")
-    private String transactionType;
+    private long transactionType;
+    @Schema(description = "事务类型名称")
+    private String transactionTypeName;
     @Schema(description = "创建人ID")
     private long creatorId;
     @Schema(description = "确认人ID")
@@ -34,6 +36,8 @@ public class TransactionVO {
     private int status;
     @Schema(description = "仓库ID")
     private Long warehouseId;
+    @Schema(description = "仓库名称")
+    private String warehouseName;
     private int deleted;
     @Schema(description = "进度")
     private int progress;
