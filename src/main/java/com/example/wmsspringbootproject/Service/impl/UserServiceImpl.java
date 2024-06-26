@@ -6,6 +6,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -172,7 +173,12 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
                 entity.setPassword(passwordEncoder.encode(entity.getPassword()));
             }
             sysUserTypeService.updateUserType(id,userForm.getTypeId());
-            boolean result = this.updateById(entity);
+            boolean result =this.lambdaUpdate()
+                    .set(Users::getName,name)
+                    .set(Users::getEmail,email)
+                    .set(Users::getPhone,phone)
+                    .set(Users::getPassword,passwordEncoder.encode(entity.getPassword()))
+                    .eq(Users::getId,id).update();
             return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
         }else{
             Users entity = userConverter.form2Entity(userForm);

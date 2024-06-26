@@ -95,6 +95,7 @@ public class ImChatUserMessageController {
             userMessageVO.setContent(result.getContent());
             userMessageVO.setFromId(result.getFromId());
             userMessageVO.setToId(result.getToId());
+            userMessageVO.setCreateTime(result.getCreateTime());
             userMessageVO.setAvatar(
                     Objects.equals(Convert.toLong(userMessageVO.getFromId()),uid) ? currentUsers.getAvatar() : users.getAvatar()
             );

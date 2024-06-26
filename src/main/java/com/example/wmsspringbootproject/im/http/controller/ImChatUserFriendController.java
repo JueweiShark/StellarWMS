@@ -106,6 +106,12 @@ public class ImChatUserFriendController {
                     .set(ImChatUserFriend::getFriendStatus,ImConfigConst.FRIEND_STATUS_NOT_VERIFY)
                     .update();
         }
+        if(redisUtil.get(uid+"_"+friendId)!=null){
+            return Result.failed("请不要重复申请！");
+        }
+        if(redisUtil.get(friendId+"_"+uid)!=null){
+            return Result.failed("对方已申请添加您为好友");
+        }
         Users users=commonQuery.getUser(Convert.toInt(friendId));
         ImChatUserFriend friend=new ImChatUserFriend();
         friend.setFriendStatus(ImConfigConst.FRIEND_STATUS_NOT_VERIFY);
