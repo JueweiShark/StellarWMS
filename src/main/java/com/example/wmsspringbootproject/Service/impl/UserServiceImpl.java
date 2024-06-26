@@ -169,14 +169,13 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
             }
             Users entity = userConverter.form2Entity(userForm);
             entity.setId(id);
-            if(!TextUtil.isEmpty(entity.getPassword())) {
-                entity.setPassword(passwordEncoder.encode(entity.getPassword()));
-            }
             sysUserTypeService.updateUserType(id,userForm.getTypeId());
             boolean result =this.lambdaUpdate()
                     .set(Users::getName,name)
                     .set(Users::getEmail,email)
                     .set(Users::getPhone,phone)
+                    .set(Users::getStatus,entity.getStatus())
+                    .set(Users::getWarehouseId,entity.getWarehouseId())
                     .set(Users::getPassword,passwordEncoder.encode(entity.getPassword()))
                     .eq(Users::getId,id).update();
             return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
