@@ -69,7 +69,8 @@ public class WebSpringSecurityConfig{
                         "/ws-app/**",
                         "ws://localhost:9427/**",
                         "/mail/code/sendEmail",
-                        "/wx/getWechatQrCode"
+                        "/wx/getWechatQrCode",
+                        "/addUser"
                 );
     }
 
