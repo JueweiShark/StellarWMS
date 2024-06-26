@@ -53,6 +53,8 @@ public class WareHouseServiceImpl extends ServiceImpl<WareHouseMapper, Warehouse
             }
             if (query.getStatus()!=-1) {
                 queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getStatus, query.getStatus()));
+            }else {
+                queryWrapper.gt(Warehouses::getStatus,0);
             }
             if(TextUtil.isNotEmpty(query.getDeleted())) {
                 queryWrapper.and(wrapper -> wrapper.eq(Warehouses::getDeleted, query.getDeleted()));

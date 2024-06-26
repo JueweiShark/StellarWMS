@@ -70,7 +70,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         System.out.println(query.getStatus());
         if (Integer.valueOf(query.getStatus()) >= -1){
             if (Integer.valueOf(query.getStatus())==-1)
-                queryWrapper.gt(Transactions::getStatus, Integer.valueOf(query.getStatus()));
+                queryWrapper.eq(Transactions::getStatus, Integer.valueOf(query.getStatus()));
             if (Integer.valueOf(query.getStatus())==1)
                 queryWrapper.eq(Transactions::getStatus, Integer.valueOf(query.getStatus()));
             if (Integer.valueOf(query.getStatus())==2)
