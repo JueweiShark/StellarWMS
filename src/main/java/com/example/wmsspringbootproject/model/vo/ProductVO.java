@@ -27,7 +27,7 @@ public class ProductVO {
     @Schema(description ="单位")
     private String unit;
     @Schema(description ="仓库id")
-    private String warehouseId;
+    private Long warehouseId;
     @Schema(description ="仓库名称")
     private String warehouseName;
     @Schema(description ="是否已被删除")

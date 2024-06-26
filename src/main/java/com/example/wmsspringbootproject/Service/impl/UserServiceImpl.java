@@ -141,7 +141,7 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
     public Result<Boolean> updateUser(UserForm userForm) {
         int id=userForm.getId();
         System.out.println(userForm.getAvatar());
-        if(userForm.getAvatar().isEmpty()){
+        if(TextUtil.isEmpty(userForm.getAvatar())){
             String name = userForm.getName();
             String phone=userForm.getPhone();
             String email=userForm.getEmail();
@@ -168,7 +168,9 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
             }
             Users entity = userConverter.form2Entity(userForm);
             entity.setId(id);
-            entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+            if(!TextUtil.isEmpty(entity.getPassword())) {
+                entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+            }
             sysUserTypeService.updateUserType(id,userForm.getTypeId());
             boolean result = this.updateById(entity);
             return result ? Result.success(result) : Result.failed(ResultCode.USER_OPERATE_ERROR);
