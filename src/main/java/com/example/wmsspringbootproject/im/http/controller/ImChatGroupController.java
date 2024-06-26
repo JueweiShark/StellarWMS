@@ -237,10 +237,7 @@ return Result.result("200","没有数据",new ArrayList<>());
             insertImChatGroupUser(group,user.getName(),user.getId(),ImConfigConst.GROUP_USER_STATUS_PASS);
             return Result.result("200","加入话题成功！",true);
         }else{
-            ImChatGroupUser userFromDB=imChatGroupUserService.getOne(new LambdaQueryWrapper<ImChatGroupUser>()
-                    .eq(ImChatGroupUser::getGroupId,group.getId())
-                    .eq(ImChatGroupUser::getUserId,user.getId())
-                    .eq(ImChatGroupUser::getUserStatus,ImConfigConst.GROUP_USER_STATUS_PASS));
+            ImChatGroupUser userFromDB=redisUtil.get(user.getId()+"_"+groupId);
             if(userFromDB!=null){
                 return Result.failed("禁止重复申请");
             }
