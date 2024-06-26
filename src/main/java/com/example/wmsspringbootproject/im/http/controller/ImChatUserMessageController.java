@@ -3,6 +3,7 @@ package com.example.wmsspringbootproject.im.http.controller;
 import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.wmsspringbootproject.Utils.*;
+import com.example.wmsspringbootproject.common.Annotation.LogNote;
 import com.example.wmsspringbootproject.common.result.Result;
 import com.example.wmsspringbootproject.constants.Constants;
 import com.example.wmsspringbootproject.core.security.model.SysUserDetails;
@@ -44,24 +45,28 @@ public class ImChatUserMessageController {
 
     //TODO: 获取系统消息
     @GetMapping("/system")
+    @LogNote(description = "获取群消息列表")
     @Operation(summary = "获取系统消息列表")
-    public Result<List<ImMessage>> getSystemMessage() {
+    public Result<List<ImMessage>> getSystemMessage(@RequestParam("page")Integer page, @RequestParam("size")Integer size) {
         Long uid= SecurityUtils.getUserId();
-        List<ImChatUserMessage> messages=imChatUserMessageService.lambdaQuery()
+        Page<ImChatUserMessage> userMessagePage=new Page<>(page,size);
+        Page<ImChatUserMessage> messages=imChatUserMessageService.lambdaQuery()
                 .eq(ImChatUserMessage::getToId,uid)
-                .eq(ImChatUserMessage::getFromId, ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID).list();
+                .eq(ImChatUserMessage::getFromId, ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID).page(userMessagePage);
 
-        List<ImChatUserGroupMessage> groupMessages=imChatUserGroupMessageService.lambdaQuery()
+        Page<ImChatUserGroupMessage> groupMessagePage=new Page<>(page,size);
+        Page<ImChatUserGroupMessage> groupMessages=imChatUserGroupMessageService.lambdaQuery()
                 .like(ImChatUserGroupMessage::getToId,uid)
-                .eq(ImChatUserGroupMessage::getFromId, ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID).list();
-        List<ImMessage> imMessageList=new ArrayList<>(groupMessages.stream()
+                .eq(ImChatUserGroupMessage::getFromId, ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID).page(groupMessagePage);
+        List<ImMessage> imMessageList=new ArrayList<>(groupMessages.getRecords().stream()
                 .map(SysPushMessage::getImMessage).toList());
 
-        imMessageList.addAll(messages.stream().map(SysPushMessage::getImMessage).toList());
+        imMessageList.addAll(messages.getRecords().stream().map(SysPushMessage::getImMessage).toList());
         return Result.success(imMessageList);
     }
     //TODO: 获取用户消息
     @GetMapping("/friend")
+    @LogNote(description = "获取用户消息列表")
     @Operation(summary = "获取用户消息列表")
     public Result<Page<UserMessageVO>> getUserMessage(@RequestParam("id")String id,
                                                       @RequestParam("currentTime")String currentTime,
@@ -114,7 +119,9 @@ public class ImChatUserMessageController {
         if(Objects.isNull(imChatUserMessage.getToId())){
             return Result.failed("接收人不能为空");
         }
-        imChatUserMessage.setFromId(ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID);
+        if(Objects.isNull(imChatUserMessage.getFromId())){
+            imChatUserMessage.setFromId(ImConfigConst.DEFAULT_SYSTEM_MESSAGE_ID);
+        }
         if(Objects.isNull(imChatUserMessage.getMessageStatus())){
             imChatUserMessage.setMessageStatus(ImConfigConst.USER_MESSAGE_STATUS_FALSE);
         }
@@ -139,5 +146,15 @@ public class ImChatUserMessageController {
         }
         boolean result=imChatUserMessageService.removeById(id);
         return result? Result.success(result) : Result.failed("删除单聊消息失败");
+    }
+
+    @GetMapping("/leaveWords")
+    @LogNote("获取留言列表")
+    @Operation(summary = "获取留言列表")
+    public Result<List<ImChatUserMessage>> getLeaveWordsList(){
+        Page<ImChatUserMessage> userMessagePage=new Page<ImChatUserMessage>(1,50);
+        Page<ImChatUserMessage> messages=imChatUserMessageService.lambdaQuery()
+                .eq(ImChatUserMessage::getToId,-2).page(userMessagePage);
+        return Result.success(messages.getRecords());
     }
 }

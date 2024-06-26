@@ -84,10 +84,16 @@ public class AuthUserServiceImpl implements AuthUserService {
         }
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(userForm.getName(),userForm.getPassword());
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(authenticationToken);
+        }catch (Exception e){
+            return Result.failed("用户名或密码错误");
+        }
         SysUserDetails userDetails=(SysUserDetails)authentication.getPrincipal();
 
-        if(WmsCache.get(Convert.toStr(userDetails.getId()))==null){
+
+        if(WmsCache.get(Convert.toStr(userDetails.getId()))==null||!jwtTokenUtil.validateToken((String) WmsCache.get(Convert.toStr(userDetails.getId())))){
             String accessToken = jwtTokenUtil.createToken(authentication);
             WmsCache.put(accessToken,jwtTokenUtil.getUser(accessToken),Constants.TOKEN_EXPIRE);
             WmsCache.put(Convert.toStr(userDetails.getId()),accessToken,Constants.TOKEN_EXPIRE);

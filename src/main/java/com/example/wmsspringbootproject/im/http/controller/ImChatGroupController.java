@@ -137,6 +137,8 @@ return Result.result("200","没有数据",new ArrayList<>());
         LambdaQueryWrapper<ImChatGroupUser> lambdaQuery=new LambdaQueryWrapper<>();
         lambdaQuery.eq(ImChatGroupUser::getGroupId,groupId);
         lambdaQuery.eq(ImChatGroupUser::getUserId,SecurityUtils.getUserId());
+        lambdaQuery.and(im->im.eq(ImChatGroupUser::getUserStatus,ImConfigConst.GROUP_USER_STATUS_PASS)
+                .or(i->i.eq(ImChatGroupUser::getUserStatus,ImConfigConst.GROUP_USER_STATUS_SILENCE)));
         ImChatGroupUser imChatGroupUser=imChatGroupUserService.getOne(lambdaQuery);
         GroupVO groupVO=null;
         ImChatGroup imChatGroup=imChatGroupService.getById(groupId);
@@ -237,7 +239,8 @@ return Result.result("200","没有数据",new ArrayList<>());
         }else{
             ImChatGroupUser userFromDB=imChatGroupUserService.getOne(new LambdaQueryWrapper<ImChatGroupUser>()
                     .eq(ImChatGroupUser::getGroupId,group.getId())
-                    .eq(ImChatGroupUser::getUserId,user.getId()));
+                    .eq(ImChatGroupUser::getUserId,user.getId())
+                    .eq(ImChatGroupUser::getUserStatus,ImConfigConst.GROUP_USER_STATUS_PASS));
             if(userFromDB!=null){
                 return Result.failed("禁止重复申请");
             }
@@ -385,7 +388,7 @@ return Result.result("200","没有数据",new ArrayList<>());
             return Result.failed("群聊不存在");
         }
         String content="";
-        ImChatGroupUser imChatGroupUser=redisUtil.get(userId+"+"+groupId);
+        ImChatGroupUser imChatGroupUser=redisUtil.get(userId+"_"+groupId);
             if(imChatGroupUser==null){
                 imChatGroupUserService.lambdaUpdate()
                         .eq(ImChatGroupUser::getUserId,userId)
@@ -393,8 +396,8 @@ return Result.result("200","没有数据",new ArrayList<>());
                         .remove();
                 //通知申请审核逾期
                 content="您对于"+imChatGroup.getGroupName()+"群聊的入群申请逾期未通过";
-                ImChatUserGroupMessage imChatUserMessage=SysPushMessage.builderMessage(imChatGroupUser.getGroupId().toString(),userId,content);
-                SysPushMessage.send(userId,imChatUserMessage, imChatGroupUser.getGroupId());
+                ImChatUserGroupMessage imChatUserMessage=SysPushMessage.builderMessage(groupId,userId,content);
+                SysPushMessage.send(userId,imChatUserMessage, Convert.toInt(groupId));
                 return Result.failed("申请已经过期");
             }else{
                 redisUtil.del(userId+"+"+groupId);
@@ -406,8 +409,8 @@ return Result.result("200","没有数据",new ArrayList<>());
                 //通知申请审核通过
                 content="您对于"+imChatGroup.getGroupName()+"群聊的入群申请";
                 content+=isPass.equals("1")?"已通过":"未通过";
-                ImChatUserGroupMessage imChatUserMessage=SysPushMessage.builderMessage(imChatGroupUser.getGroupId().toString(),userId,content);
-                SysPushMessage.send(userId,imChatUserMessage, imChatGroupUser.getGroupId());
+                ImChatUserGroupMessage imChatUserMessage=SysPushMessage.builderMessage(groupId,userId,content);
+                SysPushMessage.send(userId,imChatUserMessage, Convert.toInt(groupId));
                 return Result.success();
             }
     }
@@ -462,6 +465,7 @@ return Result.result("200","没有数据",new ArrayList<>());
 
     public GroupUserVO getGroupUserVO(ImChatGroupUser imChatGroupUser,ImChatGroup imChatGroup,Users users){
         GroupUserVO groupUserVO=new GroupUserVO();
+        groupUserVO.setId(imChatGroupUser.getId());
         groupUserVO.setUserId(imChatGroupUser.getUserId());
         groupUserVO.setGroupName(imChatGroup.getGroupName());
         groupUserVO.setUsername(users.getName());
