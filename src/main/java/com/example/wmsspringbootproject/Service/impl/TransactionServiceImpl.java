@@ -74,7 +74,7 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
             if (Integer.valueOf(query.getStatus())==1)
                 queryWrapper.eq(Transactions::getStatus, Integer.valueOf(query.getStatus()));
             if (Integer.valueOf(query.getStatus())==2)
-                queryWrapper.eq(Transactions::getStatus, Integer.valueOf(query.getStatus()));
+                queryWrapper.ge(Transactions::getStatus, 1);
         }
 
         if (TextUtil.isNotEmpty(query.getDeleted())){
@@ -95,6 +95,8 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
         transactionVOIPage.setTotal(transactionList.getTotal());
         return Result.success(transactionVOIPage);
     }
+
+
     @Subject(observer = TransactionNotify.class,filedName="create_transaction")
     @Override
     public Result<Boolean> saveTransaction(TransactionsForm form) {
@@ -149,6 +151,9 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
                 target.setStatus(-1);
             }else {
                 target.setStatus(transaction.getStatus() == 1 ? 2 : transaction.getStatus() == 2 ? 3 : 1);
+            }
+            if(target.getStatus()==3){
+                target.setDeleted(0);
             }
 //            target.setStatus(Integer.parseInt(form.getStatus()));
             if (!this.updateById(target)) {

@@ -83,28 +83,32 @@ public class ImChatGroupController {
     public Result<List<GroupVO>> list() {
         Long userId= SecurityUtils.getUserId();
         LambdaQueryWrapper<ImChatGroupUser> lambdaQuery=new LambdaQueryWrapper<>();
-        if(!SecurityUtils.isAdmin()&&!SecurityUtils.isRoot()){
             lambdaQuery.eq(ImChatGroupUser::getUserId,userId);
-        }
         lambdaQuery.in(ImChatGroupUser::getUserStatus, ImConfigConst.GROUP_USER_STATUS_PASS,ImConfigConst.GROUP_USER_STATUS_SILENCE);
         List<ImChatGroupUser> groupUsers=imChatGroupUserService.list(lambdaQuery);
 
         Map<Integer,List<ImChatGroupUser>> groupUserMap=groupUsers.stream().collect(Collectors.groupingBy(ImChatGroupUser::getGroupId));
 
         LambdaQueryWrapper<ImChatGroup> wrapper=new LambdaQueryWrapper<>();
-        wrapper.eq(ImChatGroup::getGroupType,ImConfigConst.GROUP_TOPIC);
         if(CollectionUtil.isNotEmpty(groupUserMap)){
-            wrapper.or(g->g.in(ImChatGroup::getId,groupUserMap.keySet()))
-                    .eq(ImChatGroup::getGroupType,ImConfigConst.GROUP_COMMON);
+            wrapper.in(ImChatGroup::getId,groupUserMap.keySet())
+                    .and(item->item.in(ImChatGroup::getGroupType,ImConfigConst.GROUP_TOPIC,ImConfigConst.GROUP_COMMON));
         }
         List<ImChatGroup> groups=imChatGroupService.list(wrapper);
 if(groups!=null){
+    int i=0;
     List<GroupVO> groupVOS=groups.stream().map(group->{
         List<ImChatGroupUser> imChatGroupUsers=groupUserMap.get(group.getId());
         ImChatGroupUser imChatGroupUser=null;
-        for (ImChatGroupUser GroupUser : imChatGroupUsers) {
-            if(Objects.equals(GroupUser.getUserId(), Convert.toInt(userId))){
-                imChatGroupUser=GroupUser;
+        boolean a=false;
+        for (ImChatGroupUser groupUser : groupUsers) {
+            if (Objects.equals(groupUser.getGroupId(), group.getId())) {
+                imChatGroupUser = groupUser;
+                a=true;
+                break;
+            }
+            if(a){
+                break;
             }
         }
         return getGroupVO(group,imChatGroupUser);
