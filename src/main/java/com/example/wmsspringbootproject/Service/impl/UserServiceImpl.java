@@ -171,6 +171,7 @@ public Result<IPage<UserVO>> UserList(UserQuery query) {
             entity.setId(id);
             sysUserTypeService.updateUserType(id,userForm.getTypeId());
             boolean result =this.lambdaUpdate()
+                    .set(Users::getNickName,entity.getNickName())
                     .set(Users::getName,name)
                     .set(Users::getEmail,email)
                     .set(Users::getPhone,phone)
